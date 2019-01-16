@@ -1,0 +1,97 @@
+<odoo>
+    <record id="migration_form" model="ir.ui.view">
+        <field name="name">migration.form</field>
+        <field name="model">joomla.migration</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                    <button string="Start" name="load_data" type="object"
+                            class="oe_highlight" states="setup"/>
+                    <button string="Continue" name="migrate_data" type="object"
+                            class="oe_highlight" states="migrating"
+                            confirm="This may take a long time depend on how much data you need to migrate.
+                        Please backup your database before doing this. Are you sure?"/>
+                </header>
+                <div states="setup">
+                    <h3>
+                        <field name="website_url" placeholder="Joomla Website URL (e.g. http://odoo.com)"/>
+                    </h3>
+                    <group string="Joomla Database Connection">
+                        <group>
+                            <field name="host_address"/>
+                            <field name="host_port"/>
+                            <field name="db_user"/>
+                            <field name="db_password" password="True"/>
+                        </group>
+                        <group>
+                            <field name="db_name"/>
+                            <field name="db_table_prefix"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Migration Data">
+                            <field name="include_user" string="Users"/>
+                            <field name="include_article" string="Articles"/>
+                            <field name="include_easyblog" string="EasyBlog"/>
+                        </group>
+                        <group string="Content Destination">
+                            <field name="to_website_id" string="Website"/>
+                            <field name="to_blog_id" string="Blog"/>
+                        </group>
+                    </group>
+                </div>
+                <div states="migrating">
+                    <div class="alert alert-info">
+                        <field name="migrating_info" readonly="1"/>
+                    </div>
+                    <group string="Mapping">
+                        <notebook colspan="2">
+                            <page string="Users" attrs="{'invisible': [('include_user', '=', False)]}">
+                                <div class="alert alert-info" style="margin: 3px 0">
+                                    On migrating, the joomla user that matches with a existing odoo user will be ignore.
+                                    Two users are assumed to be matching if they have same email address. The following list
+                                    already has been populated with some matching couples found automatically, you can edit it before continue.
+                                </div>
+                                <field name="user_mapping_ids">
+                                    <tree editable="top">
+                                        <field name="joomla_user_id" options="{'no_create_edit': True}"/>
+                                        <field name="odoo_user_id"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Articles" attrs="{'invisible': [('include_article', '=', False)]}">
+                                <div class="alert alert-info" style="margin: 3px 0">
+                                    By default, no joomla articles will be migrated. Please specify the articles
+                                    that you want to migrate by their category in here.
+                                </div>
+                                <field name="article_mapping_ids">
+                                    <tree editable="bottom">
+                                        <field name="category_id" domain="[('extension', 'in', ['system', 'com_content'])]"
+                                               options="{'no_create_edit': True}"/>
+                                        <field name="migrate_to"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </group>
+                </div>
+                <footer class="oe_read_only">
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="open_migration_view" model="ir.actions.act_window">
+        <field name="name">Joomla Migration</field>
+        <field name="res_model">joomla.migration</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_joomla_migration"
+              name="Joomla Migration"
+              action="open_migration_view"
+              parent="base.menu_administration"
+              sequence="1000"/>
+</odoo>
