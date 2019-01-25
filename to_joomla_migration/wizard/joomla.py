@@ -72,6 +72,8 @@ class JoomlaArticle(models.TransientModel):
     category_ids = fields.Many2many('joomla.category',
                                     compute='_compute_categories')
     language = fields.Char(joomla_column=True)
+    metakey = fields.Text(joomla_column=True)
+    metadesc = fields.Text(joomla_column=True)
 
     def _compute_categories(self):
         for article in self:
@@ -101,3 +103,17 @@ class EasyBlogPost(models.TransientModel):
     publish_up = fields.Datetime(joomla_column=True)
     state = fields.Integer(joomla_column=True)
     language = fields.Char(joomla_column=True)
+    meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
+
+
+class EasyBlogMeta(models.TransientModel):
+    _name = 'joomla.easyblog.meta'
+    _description = 'EasyBlog Meta'
+    _inherit = 'joomla.model'
+    _joomla_table = 'easyblog_meta'
+
+    type = fields.Char(joomla_column=True)
+    content_joomla_id = fields.Integer(joomla_column='content_id')
+    content_id = fields.Many2one('joomla.easyblog.post')
+    keywords = fields.Text(joomla_column=True)
+    description = fields.Text(joomla_column=True)

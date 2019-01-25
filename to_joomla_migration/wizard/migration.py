@@ -142,7 +142,7 @@ class JoomlaMigration(models.TransientModel):
         if self.include_article:
             joomla_models.extend(['joomla.category', 'joomla.article'])
         if self.include_easyblog:
-            joomla_models.extend(['joomla.easyblog.post'])
+            joomla_models.extend(['joomla.easyblog.post', 'joomla.easyblog.meta'])
         return joomla_models
 
     def _import_joomla_model(self, model):
@@ -324,6 +324,7 @@ class JoomlaMigration(models.TransientModel):
         intro_image_url = self._migrate_image(intro_image_url)
         content = self._construct_blog_post_content(main_content, intro_image_url)
         author = e_post.author_id.odoo_user_id.partner_id
+        meta = e_post.meta_ids.filtered(lambda r: r.type == 'post')
         if not author:
             author = self.env.user.partner_id
         post_values = {
@@ -333,7 +334,9 @@ class JoomlaMigration(models.TransientModel):
             'content': content,
             'website_published': e_post.published == 1,
             'post_date': e_post.publish_up or e_post.created,
-            'active': e_post.state == 0
+            'active': e_post.state == 0,
+            'website_meta_keywords': meta.keywords,
+            'website_meta_description': meta.description
         }
         post = self.env['blog.post'].create(post_values)
         return post.id
@@ -394,7 +397,9 @@ class JoomlaMigration(models.TransientModel):
             'author_id': author.id,
             'content': content,
             'website_published': article.state == 1,
-            'post_date': article.publish_up or article.created
+            'post_date': article.publish_up or article.created,
+            'website_meta_keywords': article.metakey,
+            'website_meta_description': article.metadesc
         }
         post = self.env['blog.post'].create(post_values)
         return post.id
