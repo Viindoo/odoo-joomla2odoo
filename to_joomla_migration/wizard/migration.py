@@ -332,7 +332,7 @@ class JoomlaMigration(models.TransientModel):
             'author_id': author.id,
             'content': content,
             'website_published': e_post.published == 1,
-            'post_date': e_post.publish_up,
+            'post_date': e_post.publish_up or e_post.created,
             'active': e_post.state == 0
         }
         post = self.env['blog.post'].create(post_values)
@@ -393,7 +393,8 @@ class JoomlaMigration(models.TransientModel):
             'name': article.name,
             'author_id': author.id,
             'content': content,
-            'website_published': article.state == 1
+            'website_published': article.state == 1,
+            'post_date': article.publish_up or article.created
         }
         post = self.env['blog.post'].create(post_values)
         return post.id
