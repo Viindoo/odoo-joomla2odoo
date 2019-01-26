@@ -165,16 +165,11 @@ class JoomlaMigration(models.TransientModel):
         finally:
             connection.close()
 
+        JModel.search([('migration_id', '=', self.id)]).unlink()
         for row in rows:
             values = dict(zip(column_names, row))
             values.update(migration_id=self.id)
-            domain = [('joomla_id', '=', values['joomla_id']),
-                      ('migration_id', '=', self.id)]
-            record = JModel.search(domain, limit=1)
-            if record:
-                record.write(values)
-            else:
-                record.create(values)
+            JModel.create(values)
 
     def _prepare_select_query(self, model):
         JModel = self.env[model]

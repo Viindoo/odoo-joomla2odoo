@@ -20,7 +20,6 @@ class JoomlaModel(models.AbstractModel):
     _description = 'Joomla Model Base Class'
     _joomla_table = None
 
-    joomla_id = fields.Integer(required=True, joomla_column='id')
     migration_id = fields.Many2one('joomla.migration', required=True,
                                    ondelete='cascade')
 
@@ -31,6 +30,7 @@ class JoomlaUser(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'users'
 
+    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column=True)
     username = fields.Char(joomla_column=True)
     email = fields.Char(joomla_column=True)
@@ -44,6 +44,7 @@ class JoomlaCategory(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'categories'
 
+    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     path = fields.Char(joomla_column=True)
     extension = fields.Char(joomla_column=True)
@@ -57,6 +58,7 @@ class JoomlaArticle(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'content'
 
+    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     alias = fields.Char(joomla_column=True)
     author_joomla_id = fields.Integer(joomla_column='created_by')
@@ -91,6 +93,7 @@ class EasyBlogPost(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'easyblog_post'
 
+    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     permalink = fields.Char(joomla_column=True)
     author_joomla_id = fields.Integer(joomla_column='created_by')
@@ -112,6 +115,7 @@ class EasyBlogMeta(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'easyblog_meta'
 
+    joomla_id = fields.Integer(joomla_column='id')
     type = fields.Char(joomla_column=True)
     content_joomla_id = fields.Integer(joomla_column='content_id')
     content_id = fields.Many2one('joomla.easyblog.post')
