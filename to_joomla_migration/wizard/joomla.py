@@ -76,6 +76,7 @@ class JoomlaArticle(models.TransientModel):
     language = fields.Char(joomla_column=True)
     metakey = fields.Text(joomla_column=True)
     metadesc = fields.Text(joomla_column=True)
+    tag_ids = fields.Many2many('joomla.tag', compute='_compute_tags')
 
     def _compute_categories(self):
         for article in self:
@@ -85,6 +86,35 @@ class JoomlaArticle(models.TransientModel):
                 categories += cat
                 cat = cat.parent_id
             article.category_ids = categories
+
+    def _compute_tags(self):
+        article_tags = self.env['joomla.article.tag'].search([])
+        for article in self:
+            article.tag_ids = article_tags.filtered(
+                lambda r: r.article_id == article).mapped('tag_id')
+
+
+class JoomlaTag(models.TransientModel):
+    _name = 'joomla.tag'
+    _description = 'Joomla Tag'
+    _inherit = 'joomla.model'
+    _joomla_table = 'tags'
+
+    joomla_id = fields.Integer(joomla_column='id')
+    name = fields.Char(joomla_column='title')
+    odoo_blog_tag_id = fields.Many2one('blog.tag')
+
+
+class JoomlaArticleTag(models.TransientModel):
+    _name = 'joomla.article.tag'
+    _description = 'Joomla Article Tag'
+    _inherit = 'joomla.model'
+    _joomla_table = 'contentitem_tag_map'
+
+    article_joomla_id = fields.Integer(joomla_column='content_item_id')
+    article_id = fields.Many2one('joomla.article')
+    tag_joomla_id = fields.Integer(joomla_column='tag_id')
+    tag_id = fields.Many2one('joomla.tag')
 
 
 class EasyBlogPost(models.TransientModel):
@@ -107,6 +137,13 @@ class EasyBlogPost(models.TransientModel):
     state = fields.Integer(joomla_column=True)
     language = fields.Char(joomla_column=True)
     meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
+    tag_ids = fields.Many2many('joomla.easyblog.tag', compute='_compute_tags')
+
+    def _compute_tags(self):
+        easyblog_tags = self.env['joomla.easyblog.post.tag'].search([])
+        for post in self:
+            post.tag_ids = easyblog_tags.filtered(
+                lambda r: r.post_id == post).mapped('tag_id')
 
 
 class EasyBlogMeta(models.TransientModel):
@@ -121,3 +158,26 @@ class EasyBlogMeta(models.TransientModel):
     content_id = fields.Many2one('joomla.easyblog.post')
     keywords = fields.Text(joomla_column=True)
     description = fields.Text(joomla_column=True)
+
+
+class EasyBlogTag(models.TransientModel):
+    _name = 'joomla.easyblog.tag'
+    _description = 'EasyBlog Tag'
+    _inherit = 'joomla.model'
+    _joomla_table = 'easyblog_tag'
+
+    joomla_id = fields.Integer(joomla_column='id')
+    name = fields.Char(joomla_column='title')
+    odoo_blog_tag_id = fields.Many2one('blog.tag')
+
+
+class EasyBlogPostTag(models.TransientModel):
+    _name = 'joomla.easyblog.post.tag'
+    _description = 'EasyBlog Post Tag'
+    _inherit = 'joomla.model'
+    _joomla_table = 'easyblog_post_tag'
+
+    tag_joomla_id = fields.Integer(joomla_column='tag_id')
+    tag_id = fields.Many2one('joomla.easyblog.tag')
+    post_joomla_id = fields.Integer(joomla_column='post_id')
+    post_id = fields.Many2one('joomla.easyblog.post')

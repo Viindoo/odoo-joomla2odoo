@@ -140,9 +140,11 @@ class JoomlaMigration(models.TransientModel):
         if self.include_user:
             joomla_models.extend(['joomla.user'])
         if self.include_article:
-            joomla_models.extend(['joomla.category', 'joomla.article'])
+            joomla_models.extend(['joomla.category', 'joomla.article',
+                                  'joomla.tag', 'joomla.article.tag'])
         if self.include_easyblog:
-            joomla_models.extend(['joomla.easyblog.post', 'joomla.easyblog.meta'])
+            joomla_models.extend(['joomla.easyblog.post', 'joomla.easyblog.meta',
+                                  'joomla.easyblog.tag', 'joomla.easyblog.post.tag'])
         return joomla_models
 
     def _import_joomla_model(self, model):
@@ -242,9 +244,11 @@ class JoomlaMigration(models.TransientModel):
             self._migrate_users()
         if self.include_article:
             _logger.info('migrating articles')
+            self._migrate_article_tags()
             self._migrate_articles()
         if self.include_easyblog:
             _logger.info('migrating easyblog')
+            self._migrate_easyblog_tags()
             self._migrate_easyblog()
 
     def _migrate_users(self):
@@ -322,6 +326,7 @@ class JoomlaMigration(models.TransientModel):
         meta = e_post.meta_ids.filtered(lambda r: r.type == 'post')
         if not author:
             author = self.env.user.partner_id
+        tags = e_post.tag_ids.mapped('odoo_blog_tag_id')
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': e_post.name,
@@ -331,7 +336,8 @@ class JoomlaMigration(models.TransientModel):
             'post_date': e_post.publish_up or e_post.created,
             'active': e_post.state == 0,
             'website_meta_keywords': meta.keywords,
-            'website_meta_description': meta.description
+            'website_meta_description': meta.description,
+            'tag_ids': [(6, 0, tags.ids)]
         }
         post = self.env['blog.post'].create(post_values)
         return post.id
@@ -386,6 +392,7 @@ class JoomlaMigration(models.TransientModel):
         author = article.author_id.odoo_user_id.partner_id
         if not author:
             author = self.env.user.partner_id
+        tags = article.tag_ids.mapped('odoo_blog_tag_id')
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': article.name,
@@ -394,10 +401,37 @@ class JoomlaMigration(models.TransientModel):
             'website_published': article.state == 1,
             'post_date': article.publish_up or article.created,
             'website_meta_keywords': article.metakey,
-            'website_meta_description': article.metadesc
+            'website_meta_description': article.metadesc,
+            'tag_ids': [(6, 0, tags.ids)]
         }
         post = self.env['blog.post'].create(post_values)
         return post.id
+
+    def _migrate_article_tags(self):
+        odoo_tags = self.env['blog.tag'].search([])
+        odoo_tag_names = {r.name: r for r in odoo_tags}
+        article_tags = self.env['joomla.tag'].search([])
+        for tag in article_tags:
+            odoo_tag = odoo_tag_names.get(tag.name)
+            if not odoo_tag:
+                values = {
+                    'name': tag.name
+                }
+                odoo_tag = self.env['blog.tag'].create(values)
+            tag.odoo_blog_tag_id = odoo_tag.id
+
+    def _migrate_easyblog_tags(self):
+        odoo_tags = self.env['blog.tag'].search([])
+        odoo_tag_names = {r.name: r for r in odoo_tags}
+        easyblog_tags = self.env['joomla.easyblog.tag'].search([])
+        for tag in easyblog_tags:
+            odoo_tag = odoo_tag_names.get(tag.name)
+            if not odoo_tag:
+                values = {
+                    'name': tag.name
+                }
+                odoo_tag = self.env['blog.tag'].create(values)
+            tag.odoo_blog_tag_id = odoo_tag.id
 
     @staticmethod
     def _construct_blog_post_content(main_content, intro_image_url=None):
