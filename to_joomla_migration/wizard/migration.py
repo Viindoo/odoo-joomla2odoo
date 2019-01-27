@@ -82,7 +82,8 @@ class JoomlaMigration(models.TransientModel):
         _logger.info('start loading data')
         if not self._load_data():
             raise UserError(_('No data to migrate!'))
-        self._preview_user_mapping()
+        if self.include_user:
+            self._initialize_user_mapping()
         _logger.info('loading completed')
 
         self.state = 'migrating'
@@ -121,13 +122,11 @@ class JoomlaMigration(models.TransientModel):
             self._sync_id(model)
         return joomla_models
 
-    def _preview_user_mapping(self):
-        if not self.include_user:
-            return
+    def _initialize_user_mapping(self):
         odoo_users = self.env['res.users'].with_context(active_test=False).search([])
-        email_map = {r.email: r for r in odoo_users}
+        email_map_user = {r.email: r for r in odoo_users}
         for joomla_user in self.user_ids:
-            odoo_user = email_map.get(joomla_user.email)
+            odoo_user = email_map_user.get(joomla_user.email)
             if odoo_user:
                 self.env['joomla.migration.user.mapping'].create({
                     'migration_id': self.id,
@@ -253,23 +252,21 @@ class JoomlaMigration(models.TransientModel):
 
     def _migrate_users(self):
         ResUser = self.env['res.users']
-        users = ResUser.with_context(active_test=False).search([])
-        email_map = {user.email: user for user in users}
+        odoo_users = ResUser.with_context(active_test=False).search([])
+        email_map_user = {user.email: user for user in odoo_users}
         user_map = {r.joomla_user_id: r.odoo_user_id for r in self.user_mapping_ids}
         total = len(self.user_ids)
         portal_group = self.env.ref('base.group_portal')
         for idx, joomla_user in enumerate(self.user_ids, start=1):
-            values = {
-                'name': joomla_user.name,
-                'groups_id': [(4, portal_group.id)],
-                'login': joomla_user.email,
-                'email': joomla_user.email,
-                'active': not joomla_user.block
-            }
-            odoo_user = user_map.get(joomla_user)
+            odoo_user = user_map.get(joomla_user) or email_map_user.get(joomla_user.email)
             if not odoo_user:
-                if email_map.get(joomla_user.email):
-                    continue
+                values = {
+                    'name': joomla_user.name,
+                    'groups_id': [(4, portal_group.id)],
+                    'login': joomla_user.email,
+                    'email': joomla_user.email,
+                    'active': not joomla_user.block
+                }
                 odoo_user = ResUser.create(values)
                 _logger.info('[{}/{}] created user {}'
                              .format(idx, total, joomla_user.username))
