@@ -254,16 +254,20 @@ class JoomlaMigration(models.TransientModel):
         ResUser = self.env['res.users']
         odoo_users = ResUser.with_context(active_test=False).search([])
         email_map_user = {user.email: user for user in odoo_users}
+        login_names = {user.login for user in odoo_users}
         user_map = {r.joomla_user_id: r.odoo_user_id for r in self.user_mapping_ids}
         total = len(self.user_ids)
         portal_group = self.env.ref('base.group_portal')
         for idx, joomla_user in enumerate(self.user_ids, start=1):
             odoo_user = user_map.get(joomla_user) or email_map_user.get(joomla_user.email)
             if not odoo_user:
+                login = joomla_user.username
+                if login in login_names:
+                    login = joomla_user.email
                 values = {
                     'name': joomla_user.name,
                     'groups_id': [(4, portal_group.id)],
-                    'login': joomla_user.email,
+                    'login': login,
                     'email': joomla_user.email,
                     'active': not joomla_user.block
                 }
