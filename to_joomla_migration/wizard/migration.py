@@ -464,14 +464,17 @@ class JoomlaMigration(models.TransientModel):
         # convert image urls
         img_tags = et.findall('.//img')
         for img in img_tags:
-            if img.attrib.get('src'):
-                img.attrib['src'] = self._migrate_image(img.attrib['src'])
+            url = img.get('src')
+            if url:
+                new_url = self._migrate_image(url)
+                img.set('src', new_url)
 
         # rewrite internal links
         a_tags = et.findall('.//a')
         for a in a_tags:
-            if a.attrib.get('href') and self._is_internal_url(a.attrib['href']):
-                a.attrib['href'] = '/'
+            url = a.get('href')
+            if url and self._is_internal_url(url):
+                a.set('href', '/')
         return lxml.html.tostring(et, encoding='unicode', method=to)
 
     def _migrate_image(self, image_url):
