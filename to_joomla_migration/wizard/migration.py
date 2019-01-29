@@ -176,7 +176,9 @@ class JoomlaMigration(models.TransientModel):
 
     def _prepare_select_query(self, model):
         JModel = self.env[model]
-        table = self.db_table_prefix + JModel._joomla_table
+        table = JModel._joomla_table
+        if self.db_table_prefix:
+            table = self.db_table_prefix + table
 
         field_map = {}  # odoo field name -> joomla field name
         for field in JModel._fields.values():
