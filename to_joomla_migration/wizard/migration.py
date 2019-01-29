@@ -457,10 +457,6 @@ class JoomlaMigration(models.TransientModel):
             return ''
         et = lxml.html.fromstring(content)
 
-        # for blog post teaser
-        if to == 'text':
-            return lxml.html.tostring(et, encoding='unicode', method=to)
-
         # convert image urls
         img_tags = et.findall('.//img')
         for img in img_tags:
