@@ -163,6 +163,8 @@ class JoomlaMigration(models.TransientModel):
             cursor.execute(query)
             column_names = cursor.column_names
             rows = cursor.fetchall()
+        except mysql.connector.Error as e:
+            raise UserError(e.msg)
         finally:
             connection.close()
 
