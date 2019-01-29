@@ -314,6 +314,12 @@ class JoomlaMigration(models.TransientModel):
             _logger.info('[{}/{}] created blog post {}'
                          .format(idx, total, post.permalink))
 
+        new_posts = posts.mapped('odoo_blog_post_id')
+        for post in new_posts:
+            _logger.info('updating href in blog post {}'.format(post.name))
+            content = self._convert_href(post.content, self._convert_easyblog_href)
+            post.content = content
+
     def _convert_easyblog_post(self, e_post_id):
         e_post = self.env['joomla.easyblog.post'].browse(e_post_id)
         main_content = self._migrate_content(e_post.intro + e_post.content)
@@ -345,6 +351,7 @@ class JoomlaMigration(models.TransientModel):
             'tag_ids': [(6, 0, tags.ids)]
         }
         post = self.env['blog.post'].create(post_values)
+        e_post.odoo_blog_post_id = post.id
         return post.id
 
     def _article_to_page(self, article_id):
@@ -469,13 +476,35 @@ class JoomlaMigration(models.TransientModel):
                 new_url = self._migrate_image(url)
                 img.set('src', new_url)
 
-        # rewrite internal links
+        return lxml.html.tostring(et, encoding='unicode', method=to)
+
+    def _convert_href(self, content, convert_func):
+        et = lxml.html.fromstring(content)
         a_tags = et.findall('.//a')
         for a in a_tags:
             url = a.get('href')
             if url and self._is_internal_url(url):
-                a.set('href', '/')
-        return lxml.html.tostring(et, encoding='unicode', method=to)
+                new_url = convert_func(url)
+                if not new_url:
+                    a.drop_tag()
+                    _logger.info('dropped href {}'.format(url))
+                else:
+                    a.set('href', new_url)
+                    _logger.info('converted href from {} to {}'.format(url, new_url))
+        return lxml.html.tostring(et, encoding='unicode')
+
+    def _convert_easyblog_href(self, url):
+        segments = url.split('/')
+        if len(segments) > 2 and segments[-3:-1] == ['blog', 'entry']:
+            permalink = segments[-1]
+            post = self.env['joomla.easyblog.post'].search(
+                [('permalink', '=', permalink)], limit=1
+            )
+            o_post = post.odoo_blog_post_id
+            if o_post:
+                new_url = '/blog/{}/post/{}'.format(o_post.blog_id.id, o_post.id)
+                return new_url
+        return False
 
     def _migrate_image(self, image_url):
         if not image_url:

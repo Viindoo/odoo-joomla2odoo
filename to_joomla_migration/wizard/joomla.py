@@ -138,6 +138,7 @@ class EasyBlogPost(models.TransientModel):
     language = fields.Char(joomla_column=True)
     meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
     tag_ids = fields.Many2many('joomla.easyblog.tag', compute='_compute_tags')
+    odoo_blog_post_id = fields.Many2one('blog.post')
 
     def _compute_tags(self):
         easyblog_tags = self.env['joomla.easyblog.post.tag'].search([])
