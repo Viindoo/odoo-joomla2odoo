@@ -322,7 +322,7 @@ class JoomlaMigration(models.TransientModel):
 
     def _convert_easyblog_post(self, e_post_id):
         e_post = self.env['joomla.easyblog.post'].browse(e_post_id)
-        main_content = self._migrate_content(e_post.intro + e_post.content)
+        main_content = self._migrate_easyblog_content(e_post.intro + e_post.content)
         if not e_post.image:
             intro_image_url = None
         elif e_post.image.startswith('shared/'):
@@ -357,7 +357,7 @@ class JoomlaMigration(models.TransientModel):
     def _article_to_page(self, article_id):
         article = self.env['joomla.article'].browse(article_id)
         content = article.introtext + article.fulltext
-        content = self._migrate_content(content, to='xml')
+        content = self._migrate_content_common(content, to='xml')
         view_arch = self._construct_page_view_template(article.alias, content)
         view_values = {
             'name': article.name,
@@ -391,7 +391,7 @@ class JoomlaMigration(models.TransientModel):
 
     def _article_to_blog_post(self, article_id):
         article = self.env['joomla.article'].browse(article_id)
-        main_content = self._migrate_content(article.introtext + article.fulltext)
+        main_content = self._migrate_content_common(article.introtext + article.fulltext)
         try:
             images = json.loads(article.images)
         except JSONDecodeError:
@@ -463,7 +463,11 @@ class JoomlaMigration(models.TransientModel):
             content = image + content
         return content
 
-    def _migrate_content(self, content, to='html'):
+    def _migrate_easyblog_content(self, content):
+        content = self._migrate_content_common(content)
+        return content
+
+    def _migrate_content_common(self, content, to='html'):
         if not content:
             return ''
         et = lxml.html.fromstring(content)
