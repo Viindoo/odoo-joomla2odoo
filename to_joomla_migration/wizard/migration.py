@@ -580,6 +580,28 @@ class JoomlaMigration(models.TransientModel):
         website_url_com = urllib.parse.urlparse(self.website_url)
         return url_com.netloc == website_url_com.netloc
 
+    def reset(self):
+        self.ensure_one()
+        self = self.with_context(active_test=False)
+        from_joomla = ('from_joomla', '=', True)
+
+        _logger.info('removing website pages')
+        pages = self.env['website.page'].search([from_joomla])
+        views = pages.mapped('view_id')
+        pages.unlink()
+        views.unlink()
+
+        _logger.info('removing blog data')
+        self.env['blog.post'].search([from_joomla]).unlink()
+        self.env['blog.tag'].search([from_joomla]).unlink()
+
+        _logger.info('removing image attachments')
+        self.env['ir.attachment'].search([from_joomla]).unlink()
+
+        _logger.info('removing users')
+        self.env['res.users'].search([from_joomla]).unlink()
+        self.env['res.partner'].search([from_joomla]).unlink()
+
 
 class UserMapping(models.TransientModel):
     _name = 'joomla.migration.user.mapping'

@@ -8,6 +8,8 @@
                     <field name="state" widget="statusbar"/>
                     <button string="Start" name="load_data" type="object"
                             class="oe_highlight" states="setup"/>
+                    <button string="Reset" name="reset" type="object"
+                            states="setup" confirm="Do you want to remove all migrated data?"/>
                     <button string="Continue" name="migrate_data" type="object"
                             class="oe_highlight" states="migrating"
                             confirm="This may take a long time depend on how much data you need to migrate.
