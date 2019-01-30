@@ -236,7 +236,7 @@ class JoomlaMigration(models.TransientModel):
         self.ensure_one()
         _logger.info('start migrating data')
         start = datetime.now()
-        self._migrate_data()
+        self.with_context(active_test=False)._migrate_data()
         time = datetime.now() - start
         _logger.info('migrating completed ({}m, {}s)'
                      .format(time.seconds // 60, time.seconds % 60))
@@ -256,7 +256,7 @@ class JoomlaMigration(models.TransientModel):
 
     def _migrate_users(self):
         ResUser = self.env['res.users']
-        odoo_users = ResUser.with_context(active_test=False).search([])
+        odoo_users = ResUser.search([])
         email_map_user = {user.email: user for user in odoo_users}
         login_names = {user.login for user in odoo_users}
         user_map = {r.joomla_user_id: r.odoo_user_id for r in self.user_mapping_ids}
