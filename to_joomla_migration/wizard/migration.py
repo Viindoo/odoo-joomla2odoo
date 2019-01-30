@@ -273,7 +273,8 @@ class JoomlaMigration(models.TransientModel):
                     'groups_id': [(4, portal_group.id)],
                     'login': login,
                     'email': joomla_user.email,
-                    'active': not joomla_user.block
+                    'active': not joomla_user.block,
+                    'from_joomla': True
                 }
                 odoo_user = ResUser.create(values)
                 _logger.info('[{}/{}] created user {}'
@@ -348,7 +349,8 @@ class JoomlaMigration(models.TransientModel):
             'active': e_post.state == 0,
             'website_meta_keywords': meta.keywords,
             'website_meta_description': meta.description,
-            'tag_ids': [(6, 0, tags.ids)]
+            'tag_ids': [(6, 0, tags.ids)],
+            'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
         e_post.odoo_blog_post_id = post.id
@@ -372,7 +374,8 @@ class JoomlaMigration(models.TransientModel):
             'view_id': view.id,
             'website_published': article.state == 1,
             'website_ids': [(4, self.to_website_id.id)],
-            'active': article.state == 0 or article.state == 1
+            'active': article.state == 0 or article.state == 1,
+            'from_joomla': True
         }
         page = self.env['website.page'].create(page_values)
         return page.id
@@ -414,7 +417,8 @@ class JoomlaMigration(models.TransientModel):
             'post_date': article.publish_up or article.created,
             'website_meta_keywords': article.metakey,
             'website_meta_description': article.metadesc,
-            'tag_ids': [(6, 0, tags.ids)]
+            'tag_ids': [(6, 0, tags.ids)],
+            'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
         return post.id
@@ -427,7 +431,8 @@ class JoomlaMigration(models.TransientModel):
             odoo_tag = odoo_tag_names.get(tag.name)
             if not odoo_tag:
                 values = {
-                    'name': tag.name
+                    'name': tag.name,
+                    'from_joomla': True
                 }
                 odoo_tag = self.env['blog.tag'].create(values)
             tag.odoo_blog_tag_id = odoo_tag.id
@@ -440,7 +445,8 @@ class JoomlaMigration(models.TransientModel):
             odoo_tag = odoo_tag_names.get(tag.name)
             if not odoo_tag:
                 values = {
-                    'name': tag.name
+                    'name': tag.name,
+                    'from_joomla': True
                 }
                 odoo_tag = self.env['blog.tag'].create(values)
             tag.odoo_blog_tag_id = odoo_tag.id
@@ -560,7 +566,8 @@ class JoomlaMigration(models.TransientModel):
             'datas': data_b64,
             'datas_fname': name,
             'res_model': 'ir.ui.view',
-            'public': True
+            'public': True,
+            'from_joomla': True
         }
         attach = self.env['ir.attachment'].create(values)
         new_url = '/web/image/{}/{}'.format(attach.id, name)
