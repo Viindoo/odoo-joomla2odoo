@@ -12,6 +12,7 @@ import lxml.html
 import mysql.connector
 
 from odoo import _, api, fields, models
+from odoo.addons.http_routing.models.ir_http import slugify
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -367,7 +368,8 @@ class JoomlaMigration(models.TransientModel):
             'arch_base': view_arch
         }
         view = self.env['ir.ui.view'].create(view_values)
-        page_url = '/' + article.category_id.path + article.alias
+        page_url = article.category_id.path + '/' + article.alias
+        page_url = '/' + slugify(page_url, path=True)
         page_values = {
             'name': article.name,
             'url': page_url,
