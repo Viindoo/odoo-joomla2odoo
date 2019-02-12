@@ -611,7 +611,7 @@ class JoomlaMigration(models.TransientModel):
         self.env['res.users'].search([from_joomla]).unlink()
         self.env['res.partner'].search([from_joomla]).unlink()
 
-        _logger.info('removing redirect')
+        _logger.info('removing redirects')
         self.env['website.redirect'].search([from_joomla]).unlink()
 
     def _create_redirects(self):
