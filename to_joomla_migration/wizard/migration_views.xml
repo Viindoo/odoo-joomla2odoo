@@ -41,6 +41,9 @@
                             <field name="to_website_id" string="Website"/>
                             <field name="to_blog_id" string="Blog"/>
                         </group>
+                        <group>
+                            <field name="redirect"/>
+                        </group>
                     </group>
                 </div>
                 <div states="migrating">

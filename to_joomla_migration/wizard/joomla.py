@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import urllib.parse
+
 from odoo import api, fields, models, _
 
 
@@ -50,6 +52,7 @@ class JoomlaCategory(models.TransientModel):
     extension = fields.Char(joomla_column=True)
     parent_joomla_id = fields.Integer(joomla_column='parent_id')
     parent_id = fields.Many2one('joomla.category')
+    menu_ids = fields.One2many('joomla.menu', 'category_id')
 
 
 class JoomlaArticle(models.TransientModel):
@@ -77,6 +80,9 @@ class JoomlaArticle(models.TransientModel):
     metakey = fields.Text(joomla_column=True)
     metadesc = fields.Text(joomla_column=True)
     tag_ids = fields.Many2many('joomla.tag', compute='_compute_tags')
+    odoo_page_id = fields.Many2one('website.page')
+    odoo_blog_post_id = fields.Many2one('blog.post')
+    menu_ids = fields.One2many('joomla.menu', 'article_id')
 
     def _compute_categories(self):
         for article in self:
@@ -115,6 +121,37 @@ class JoomlaArticleTag(models.TransientModel):
     article_id = fields.Many2one('joomla.article')
     tag_joomla_id = fields.Integer(joomla_column='tag_id')
     tag_id = fields.Many2one('joomla.tag')
+
+
+class JoomlaMenu(models.TransientModel):
+    _name = 'joomla.menu'
+    _description = 'Joomla Menu'
+    _inherit = 'joomla.model'
+    _joomla_table = 'menu'
+
+    joomla_id = fields.Integer(joomla_column='id')
+    path = fields.Char(joomla_column=True)
+    link = fields.Char(joomla_column=True)
+    article_joomla_id = fields.Integer(compute='_compute_content', store=True)
+    article_id = fields.Many2one('joomla.article')
+    category_joomla_id = fields.Integer(compute='_compute_content', store=True)
+    category_id = fields.Many2one('joomla.category')
+
+    @api.depends('path')
+    def _compute_content(self):
+        for menu in self:
+            url_components = urllib.parse.urlparse(menu.link)
+            if not url_components.path == 'index.php':
+                continue
+            query = dict(urllib.parse.parse_qsl(url_components.query))
+            option = query.get('option')
+            view = query.get('view')
+            _id = query.get('id')
+            if option == 'com_content' and _id:
+                if view == 'article':
+                    menu.article_joomla_id = int(_id)
+                elif view == 'category':
+                    menu.category_joomla_id = int(_id)
 
 
 class EasyBlogPost(models.TransientModel):

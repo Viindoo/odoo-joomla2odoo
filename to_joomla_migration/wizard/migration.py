@@ -5,6 +5,7 @@ import logging
 import re
 import urllib.parse
 import urllib.request
+from collections import OrderedDict
 from datetime import datetime
 from json import JSONDecodeError
 
@@ -42,6 +43,7 @@ class JoomlaMigration(models.TransientModel):
     include_user = fields.Boolean(default=True)
     include_article = fields.Boolean(default=True)
     include_easyblog = fields.Boolean(default=False)
+    redirect = fields.Boolean(default=False)
 
     to_website_id = fields.Many2one('website', default=_default_to_website)
     to_blog_id = fields.Many2one('blog.blog', default=_default_to_blog)
@@ -145,6 +147,7 @@ class JoomlaMigration(models.TransientModel):
         if self.include_easyblog:
             joomla_models.extend(['joomla.easyblog.post', 'joomla.easyblog.meta',
                                   'joomla.easyblog.tag', 'joomla.easyblog.post.tag'])
+        joomla_models.extend(['joomla.menu'])
         return joomla_models
 
     def _import_joomla_model(self, model):
@@ -238,6 +241,8 @@ class JoomlaMigration(models.TransientModel):
         _logger.info('start migrating data')
         start = datetime.now()
         self.with_context(active_test=False)._migrate_data()
+        if self.redirect:
+            self._update_redirect()
         time = datetime.now() - start
         _logger.info('migrating completed ({}m, {}s)'
                      .format(time.seconds // 60, time.seconds % 60))
@@ -380,6 +385,7 @@ class JoomlaMigration(models.TransientModel):
             'from_joomla': True
         }
         page = self.env['website.page'].create(page_values)
+        article.odoo_page_id = page.id
         return page.id
 
     @staticmethod
@@ -423,6 +429,7 @@ class JoomlaMigration(models.TransientModel):
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
+        article.odoo_blog_post_id = post.id
         return post.id
 
     def _migrate_article_tags(self):
@@ -603,6 +610,70 @@ class JoomlaMigration(models.TransientModel):
         _logger.info('removing users')
         self.env['res.users'].search([from_joomla]).unlink()
         self.env['res.partner'].search([from_joomla]).unlink()
+
+        _logger.info('removing redirect')
+        self.env['website.redirect'].search([from_joomla]).unlink()
+
+    def _update_redirect(self):
+        rules = self._build_redirect_rules()
+        rules = OrderedDict(rules)
+        for from_url, to_url in rules.items():
+            values = {
+                'type': '301',
+                'url_from': from_url,
+                'url_to': to_url,
+                'website_id': self.to_website_id.id,
+                'from_joomla': True
+            }
+            self.env['website.redirect'].create(values)
+
+    def _build_redirect_rules(self):
+        rules = []
+
+        articles = self.env['joomla.article'].search([])
+        for article in articles:
+            rules.extend(self._build_article_redirect_rules(article.id))
+
+        posts = self.env['joomla.easyblog.post'].search([])
+        for post in posts:
+            rules.extend(self._build_easyblog_post_redirect_rules(post.id))
+
+        return rules
+
+    def _build_article_redirect_rules(self, article_id):
+        article = self.env['joomla.article'].browse(article_id)
+        if not article.odoo_page_id and not article.odoo_blog_post_id:
+            return []
+
+        from_urls = []
+        menus = article.menu_ids or article.category_ids.mapped('menu_ids')
+        for menu in menus:
+            if menu.article_id:
+                from_url = '/' + menu.path
+            elif menu.category_id:
+                from_url = '/{}/{}-{}'.format(menu.path,
+                                              article.joomla_id, article.alias)
+            else:
+                continue
+            from_urls.append(from_url)
+
+        if article.odoo_page_id:
+            to_url = article.odoo_page_id.url
+        else:
+            post = article.odoo_blog_post_id
+            to_url = '/blog/{}/post/{}'.format(post.blog_id.id, post.id)
+
+        rules = [(from_url, to_url) for from_url in from_urls]
+        return rules
+
+    def _build_easyblog_post_redirect_rules(self, post_id):
+        post = self.env['joomla.easyblog.post'].browse(post_id)
+        if not post.odoo_blog_post_id:
+            return []
+        from_url = '/blog/entry/' + post.permalink
+        odoo_post = post.odoo_blog_post_id
+        to_url = '/blog/{}/post/{}'.format(odoo_post.blog_id.id, odoo_post.id)
+        return [(from_url, to_url)]
 
 
 class UserMapping(models.TransientModel):

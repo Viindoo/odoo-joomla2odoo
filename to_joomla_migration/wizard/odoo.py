@@ -30,3 +30,9 @@ class Attachment(models.Model):
     _inherit = 'ir.attachment'
 
     from_joomla = fields.Boolean()
+
+
+class WebsiteRedirect(models.Model):
+    _inherit = 'website.redirect'
+
+    from_joomla = fields.Boolean()
