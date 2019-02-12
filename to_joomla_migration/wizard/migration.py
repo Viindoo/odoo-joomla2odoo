@@ -242,7 +242,7 @@ class JoomlaMigration(models.TransientModel):
         start = datetime.now()
         self.with_context(active_test=False)._migrate_data()
         if self.redirect:
-            self._update_redirect()
+            self._create_redirects()
         time = datetime.now() - start
         _logger.info('migrating completed ({}m, {}s)'
                      .format(time.seconds // 60, time.seconds % 60))
@@ -614,7 +614,7 @@ class JoomlaMigration(models.TransientModel):
         _logger.info('removing redirect')
         self.env['website.redirect'].search([from_joomla]).unlink()
 
-    def _update_redirect(self):
+    def _create_redirects(self):
         rules = self._build_redirect_rules()
         rules = OrderedDict(rules)
         for from_url, to_url in rules.items():
