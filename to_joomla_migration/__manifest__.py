@@ -7,7 +7,9 @@
     'website': "https://ma.tvtmarine.com",
     'category': '',
     'version': '0.1',
-    'depends': ['website_blog'],
+    'depends': [
+        'to_website_content_language'
+    ],
     'data': [
         'wizard/joomla_views.xml',
         'wizard/migration_views.xml'

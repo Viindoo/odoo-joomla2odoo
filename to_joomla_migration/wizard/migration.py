@@ -345,6 +345,7 @@ class JoomlaMigration(models.TransientModel):
         if not author:
             author = self.env.user.partner_id
         tags = e_post.tag_ids.mapped('odoo_blog_tag_id')
+        language_id = self._find_language_id_by_code(e_post.language)
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': e_post.name,
@@ -356,6 +357,7 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_keywords': meta.keywords,
             'website_meta_description': meta.description,
             'tag_ids': [(6, 0, tags.ids)],
+            'language_id': language_id,
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
@@ -376,6 +378,7 @@ class JoomlaMigration(models.TransientModel):
         view = self.env['ir.ui.view'].create(view_values)
         category_path = slugify(article.category_id.path)
         page_url = '/' + category_path + '/' + alias
+        language_id = self._find_language_id_by_code(article.language)
         page_values = {
             'name': article.name,
             'url': page_url,
@@ -383,6 +386,7 @@ class JoomlaMigration(models.TransientModel):
             'website_published': article.state == 1,
             'website_ids': [(4, self.to_website_id.id)],
             'active': article.state == 0 or article.state == 1,
+            'language_id': language_id,
             'from_joomla': True
         }
         page = self.env['website.page'].create(page_values)
@@ -419,6 +423,7 @@ class JoomlaMigration(models.TransientModel):
         if not author:
             author = self.env.user.partner_id
         tags = article.tag_ids.mapped('odoo_blog_tag_id')
+        language_id = self._find_language_id_by_code(article.language)
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': article.name,
@@ -429,6 +434,7 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_keywords': article.metakey,
             'website_meta_description': article.metadesc,
             'tag_ids': [(6, 0, tags.ids)],
+            'language_id': language_id,
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
@@ -677,6 +683,19 @@ class JoomlaMigration(models.TransientModel):
         odoo_post = post.odoo_blog_post_id
         to_url = '/blog/{}/post/{}'.format(odoo_post.blog_id.id, odoo_post.id)
         return [(from_url, to_url)]
+
+    def _find_language_id_by_code(self, code):
+        if '-' not in code:
+            return False
+        code = code.replace('-', '_')
+        languages = self.env['res.lang'].search([('active', '=', True)])
+        exact_matches = languages.filtered(lambda r: r.code == code)
+        if exact_matches:
+            return exact_matches[0].id
+        nearest_matches = languages.filtered(lambda r: r.code.startswith(code[:2]))
+        if nearest_matches:
+            return nearest_matches[0].id
+        return False
 
 
 class UserMapping(models.TransientModel):
