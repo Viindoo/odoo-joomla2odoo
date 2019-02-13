@@ -394,7 +394,9 @@ class JoomlaMigration(models.TransientModel):
             <t t-name="website.{}">
                 <t t-call="website.layout">
                     <div id="wrap" class="oe_structure oe_empty">
-                        {}
+                        <div class="container">
+                            {}
+                        </div>
                     </div>
                 </t>
             </t>
