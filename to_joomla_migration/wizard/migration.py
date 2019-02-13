@@ -366,15 +366,16 @@ class JoomlaMigration(models.TransientModel):
         article = self.env['joomla.article'].browse(article_id)
         content = article.introtext + article.fulltext
         content = self._migrate_content_common(content, to='xml')
-        view_arch = self._construct_page_view_template(article.alias, content)
+        alias = slugify(article.alias)
+        view_arch = self._construct_page_view_template(alias, content)
         view_values = {
             'name': article.name,
             'type': 'qweb',
             'arch_base': view_arch
         }
         view = self.env['ir.ui.view'].create(view_values)
-        page_url = article.category_id.path + '/' + article.alias
-        page_url = '/' + slugify(page_url, path=True)
+        category_path = slugify(article.category_id.path)
+        page_url = '/' + category_path + '/' + alias
         page_values = {
             'name': article.name,
             'url': page_url,
