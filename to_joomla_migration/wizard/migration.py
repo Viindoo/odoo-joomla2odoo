@@ -146,7 +146,8 @@ class JoomlaMigration(models.TransientModel):
         if self.include_easyblog:
             joomla_models.extend(['joomla.easyblog.post', 'joomla.easyblog.meta',
                                   'joomla.easyblog.tag', 'joomla.easyblog.post.tag'])
-        joomla_models.extend(['joomla.menu'])
+        if self.include_article or self.include_easyblog:
+            joomla_models.extend(['joomla.menu'])
         return joomla_models
 
     def _import_joomla_model(self, model):
