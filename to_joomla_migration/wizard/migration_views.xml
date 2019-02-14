@@ -36,13 +36,11 @@
                             <field name="include_user" string="Users"/>
                             <field name="include_article" string="Articles"/>
                             <field name="include_easyblog" string="EasyBlog"/>
+                            <field name="redirect" string="Create Redirects"/>
                         </group>
                         <group string="Content Destination">
                             <field name="to_website_id" string="Website"/>
                             <field name="to_blog_id" string="Blog"/>
-                        </group>
-                        <group>
-                            <field name="redirect"/>
                         </group>
                     </group>
                 </div>
