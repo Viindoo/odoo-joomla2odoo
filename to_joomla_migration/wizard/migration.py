@@ -345,7 +345,7 @@ class JoomlaMigration(models.TransientModel):
         if not author:
             author = self.env.user.partner_id
         tags = e_post.tag_ids.mapped('odoo_blog_tag_id')
-        language_id = self._find_language_id_by_code(e_post.language)
+        language_id = self._determine_easyblog_post_language(e_post_id)
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': e_post.name,
@@ -378,7 +378,7 @@ class JoomlaMigration(models.TransientModel):
         view = self.env['ir.ui.view'].create(view_values)
         category_path = slugify(article.category_id.path)
         page_url = '/' + category_path + '/' + alias
-        language_id = self._find_language_id_by_code(article.language)
+        language_id = self._determine_article_language(article_id)
         page_values = {
             'name': article.name,
             'url': page_url,
@@ -423,7 +423,7 @@ class JoomlaMigration(models.TransientModel):
         if not author:
             author = self.env.user.partner_id
         tags = article.tag_ids.mapped('odoo_blog_tag_id')
-        language_id = self._find_language_id_by_code(article.language)
+        language_id = self._determine_article_language(article_id)
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': article.name,
@@ -696,6 +696,24 @@ class JoomlaMigration(models.TransientModel):
         if nearest_matches:
             return nearest_matches[0].id
         return False
+
+    def _determine_article_language(self, article_id):
+        article = self.env['joomla.article'].browse(article_id)
+        language_id = self._find_language_id_by_code(article.language)
+        if not language_id and article.menu_ids:
+            menu = article.menu_ids[0]
+            language_id = self._find_language_id_by_code(menu.language)
+        return language_id
+
+    def _determine_easyblog_post_language(self, post_id):
+        post = self.env['joomla.easyblog.post'].browse(post_id)
+        language_id = self._find_language_id_by_code(post.language)
+        if not language_id:
+            menu = self.env['joomla.menu'].search(
+                [('easyblog_latest', '=', True)], limit=1)
+            if menu:
+                language_id = self._find_language_id_by_code(menu.language)
+        return language_id
 
 
 class UserMapping(models.TransientModel):

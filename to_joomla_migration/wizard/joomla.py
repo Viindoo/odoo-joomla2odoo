@@ -132,10 +132,13 @@ class JoomlaMenu(models.TransientModel):
     joomla_id = fields.Integer(joomla_column='id')
     path = fields.Char(joomla_column=True)
     link = fields.Char(joomla_column=True)
+    language = fields.Char(joomla_column=True)
     article_joomla_id = fields.Integer(compute='_compute_content', store=True)
     article_id = fields.Many2one('joomla.article')
     category_joomla_id = fields.Integer(compute='_compute_content', store=True)
     category_id = fields.Many2one('joomla.category')
+    easyblog_latest = fields.Boolean('joomla.easyblog', compute='_compute_content',
+                                     store=True)
 
     @api.depends('path')
     def _compute_content(self):
@@ -152,6 +155,8 @@ class JoomlaMenu(models.TransientModel):
                     menu.article_joomla_id = int(_id)
                 elif view == 'category':
                     menu.category_joomla_id = int(_id)
+            elif option == 'com_easyblog' and view == 'latest':
+                menu.easyblog_latest = True
 
 
 class EasyBlogPost(models.TransientModel):
