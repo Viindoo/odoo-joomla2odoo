@@ -624,6 +624,15 @@ class JoomlaMigration(models.TransientModel):
         self.env['website.redirect'].search([from_joomla]).unlink()
 
     def _create_redirects(self):
+        url_components = urllib.parse.urlparse(self.website_url)
+        domain = url_components.netloc.partition(':')[0]
+        website = self.env['website'].search([('domain', '=', domain)], limit=1)
+        if not website:
+            values = {
+                'name': domain,
+                'domain': domain
+            }
+            website = self.env['website'].create(values)
         rules = self._build_redirect_rules()
         rules = OrderedDict(rules)
         for from_url, to_url in rules.items():
@@ -631,7 +640,7 @@ class JoomlaMigration(models.TransientModel):
                 'type': '301',
                 'url_from': from_url,
                 'url_to': to_url,
-                'website_id': self.to_website_id.id,
+                'website_id': website.id,
                 'from_joomla': True
             }
             self.env['website.redirect'].create(values)
