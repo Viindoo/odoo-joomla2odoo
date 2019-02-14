@@ -79,7 +79,8 @@ class JoomlaMigration(models.TransientModel):
 
     def load_data(self):
         self.ensure_one()
-        self._remove_old_data()
+        old_data = self.env['joomla.migration'].search([]) - self
+        old_data.unlink()
 
         _logger.info('start loading data')
         if not self._load_data():
@@ -99,11 +100,6 @@ class JoomlaMigration(models.TransientModel):
             'res_id': self.id,
             'target': 'new',
         }
-
-    def _remove_old_data(self):
-        # Remove old data to avoid slowing down
-        old = self.env['joomla.migration'].search([]) - self
-        old.unlink()
 
     def _get_migrating_info(self):
         info = 'Found data:\n'
