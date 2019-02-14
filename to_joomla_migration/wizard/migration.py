@@ -14,7 +14,7 @@ import mysql.connector
 
 from odoo import _, api, fields, models
 from odoo.addons.http_routing.models.ir_http import slugify
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -58,13 +58,12 @@ class JoomlaMigration(models.TransientModel):
 
     migrating_info = fields.Text()
 
-    @api.onchange('website_url')
-    def _onchange_website_url(self):
-        if not self.website_url:
-            return
-        if not re.match(r'https?://\w', self.website_url):
-            raise UserError(_('Invalid website URL!. Website URL should be like '
-                              'http[s]://your.domain'))
+    @api.constrains('website_url')
+    def _check_website_url(self):
+        if not re.match(r'https?://[a-zA-Z0-9.\-:]+$', self.website_url):
+            message = _('Invalid website URL!. Website URL should be like '
+                        'http[s]://your.domain')
+            raise ValidationError(message)
 
     @api.model
     def default_get(self, fields_list):
