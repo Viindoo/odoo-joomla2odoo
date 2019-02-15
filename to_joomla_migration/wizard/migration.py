@@ -15,6 +15,7 @@ import mysql.connector
 from odoo import _, api, fields, models
 from odoo.addons.http_routing.models.ir_http import slugify
 from odoo.exceptions import UserError, ValidationError
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
@@ -620,26 +621,37 @@ class JoomlaMigration(models.TransientModel):
         self.env['website.redirect'].search([from_joomla]).unlink()
 
     def _create_redirects(self):
-        url_components = urllib.parse.urlparse(self.website_url)
-        domain = url_components.netloc.partition(':')[0]
-        website = self.env['website'].search([('domain', '=', domain)], limit=1)
-        if not website:
+        from_domain = urllib.parse.urlparse(self.website_url).hostname
+        from_website = self.env['website'].search(
+            [('domain', '=', from_domain)], limit=1)
+        if not from_website:
             values = {
-                'name': domain,
-                'domain': domain
+                'name': from_domain,
+                'domain': from_domain
             }
-            website = self.env['website'].create(values)
+            from_website = self.env['website'].create(values)
+        to_website_url = self._get_website_url(self.to_website_id.id)
         rules = self._build_redirect_rules()
         rules = OrderedDict(rules)
         for from_url, to_url in rules.items():
+            to_url = urllib.parse.urljoin(to_website_url, to_url)
             values = {
                 'type': '301',
                 'url_from': from_url,
                 'url_to': to_url,
-                'website_id': website.id,
+                'website_id': from_website.id,
                 'from_joomla': True
             }
             self.env['website.redirect'].create(values)
+
+    def _get_website_url(self, website_id):
+        request_url = request.httprequest.url_root
+        request_url_components = urllib.parse.urlparse(request_url)
+        website = self.env['website'].browse(website_id)
+        url = '{}://{}'.format(request_url_components.scheme, website.domain)
+        if request_url_components.port:
+            url += ':{}'.format(request_url_components.port)
+        return url
 
     def _build_redirect_rules(self):
         rules = []
