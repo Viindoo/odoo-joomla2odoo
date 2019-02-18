@@ -28,7 +28,7 @@
                         </group>
                         <group>
                             <field name="db_name"/>
-                            <field name="db_table_prefix"/>
+                            <field name="db_table_prefix" placehold="sf2d0_"/>
                         </group>
                     </group>
                     <group>
@@ -51,6 +51,9 @@
                     <group string="Mapping">
                         <notebook colspan="2">
                             <page string="Users" attrs="{'invisible': [('include_user', '=', False)]}">
+                            	<group>
+                            		<field name="no_reset_password"/>
+                            	</group>
                                 <div class="alert alert-info" style="margin: 3px 0">
                                     On migrating, the joomla user that matches with a existing odoo user will be ignore.
                                     Two users are assumed to be matching if they have same email address. The following list

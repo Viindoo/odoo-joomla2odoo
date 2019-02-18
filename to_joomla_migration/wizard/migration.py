@@ -58,6 +58,7 @@ class JoomlaMigration(models.TransientModel):
     article_mapping_ids = fields.One2many('joomla.migration.article.mapping', 'migration_id')
 
     migrating_info = fields.Text()
+    no_reset_password = fields.Boolean(string='No Reset Password', default=True, help="If checked, no reset password request will be raised")
 
     @api.constrains('website_url')
     def _check_website_url(self):
@@ -279,7 +280,10 @@ class JoomlaMigration(models.TransientModel):
                     'active': not joomla_user.block,
                     'from_joomla': True
                 }
-                odoo_user = ResUser.create(values)
+                if self.no_reset_password:
+                    odoo_user = ResUser.with_context(no_reset_password=True).create(values)
+                else:
+                    odoo_user = ResUser.create(values)
                 _logger.info('[{}/{}] created user {}'
                              .format(idx, total, joomla_user.username))
             joomla_user.odoo_user_id = odoo_user.id
