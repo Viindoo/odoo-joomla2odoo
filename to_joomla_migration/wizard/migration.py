@@ -362,7 +362,10 @@ class JoomlaMigration(models.TransientModel):
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
-        e_post.odoo_blog_post_id = post.id
+        e_post.write({
+            'odoo_blog_post_id': post.id,
+            'odoo_language_id': language_id
+        })
         return post.id
 
     def _article_to_page(self, article_id):
@@ -391,7 +394,10 @@ class JoomlaMigration(models.TransientModel):
             'from_joomla': True
         }
         page = self.env['website.page'].create(page_values)
-        article.odoo_page_id = page.id
+        article.write({
+            'odoo_page_id': page.id,
+            'odoo_language_id': language_id
+        })
         return page.id
 
     @staticmethod
@@ -439,7 +445,10 @@ class JoomlaMigration(models.TransientModel):
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
-        article.odoo_blog_post_id = post.id
+        article.write({
+            'odoo_blog_post_id': post.id,
+            'odoo_language_id': language_id
+        })
         return post.id
 
     def _migrate_article_tags(self):
@@ -693,6 +702,8 @@ class JoomlaMigration(models.TransientModel):
             post = article.odoo_blog_post_id
             to_url = '/blog/{}/post/{}'.format(post.blog_id.id, post.id)
 
+        if article.odoo_language_id:
+            to_url = '/' + article.odoo_language_id.code + to_url
         rules = [(from_url, to_url) for from_url in from_urls]
         return rules
 
@@ -703,6 +714,8 @@ class JoomlaMigration(models.TransientModel):
         from_url = '/blog/entry/' + post.permalink
         odoo_post = post.odoo_blog_post_id
         to_url = '/blog/{}/post/{}'.format(odoo_post.blog_id.id, odoo_post.id)
+        if post.odoo_language_id:
+            to_url = '/' + post.odoo_language_id.code + to_url
         return [(from_url, to_url)]
 
     def _find_language_id_by_code(self, code):
