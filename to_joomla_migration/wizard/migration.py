@@ -304,13 +304,13 @@ class JoomlaMigration(models.TransientModel):
 
         total = len(page_articles)
         for idx, article in enumerate(page_articles, start=1):
-            self._article_to_page(article.id)
+            self._article_to_page(article)
             _logger.info('[{}/{}] created page {}'
                          .format(idx, total, article.alias))
 
         total = len(blog_articles)
         for idx, article in enumerate(blog_articles, start=1):
-            self._article_to_blog_post(article.id)
+            self._article_to_blog_post(article)
             _logger.info('[{}/{}] created blog post {}'
                          .format(idx, total, article.alias))
 
@@ -318,7 +318,7 @@ class JoomlaMigration(models.TransientModel):
         posts = self.easyblog_post_ids
         total = len(posts)
         for idx, post in enumerate(posts, start=1):
-            self._convert_easyblog_post(post.id)
+            self._convert_easyblog_post(post)
             _logger.info('[{}/{}] created blog post {}'
                          .format(idx, total, post.permalink))
 
@@ -328,8 +328,7 @@ class JoomlaMigration(models.TransientModel):
             content = self._convert_href(post.content, self._convert_easyblog_href)
             post.content = content
 
-    def _convert_easyblog_post(self, e_post_id):
-        e_post = self.env['joomla.easyblog.post'].browse(e_post_id)
+    def _convert_easyblog_post(self, e_post):
         main_content = self._migrate_easyblog_content(e_post.intro + e_post.content)
         if not e_post.image:
             intro_image_url = None
@@ -346,8 +345,8 @@ class JoomlaMigration(models.TransientModel):
         if not author:
             author = self.env.user.partner_id
         tags = e_post.tag_ids.mapped('odoo_blog_tag_id')
-        language = e_post.get_language()
-        language_id = self._find_language_id_by_code(language)
+        language_code = e_post.get_language()
+        language = self._find_compatible_odoo_language(language_code)
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': e_post.name,
@@ -359,18 +358,17 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_keywords': meta.keywords,
             'website_meta_description': meta.description,
             'tag_ids': [(6, 0, tags.ids)],
-            'language_id': language_id,
+            'language_id': language.id,
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
         e_post.write({
             'odoo_blog_post_id': post.id,
-            'odoo_language_id': language_id
+            'odoo_language_id': language.id
         })
-        return post.id
+        return post
 
-    def _article_to_page(self, article_id):
-        article = self.env['joomla.article'].browse(article_id)
+    def _article_to_page(self, article):
         content = article.introtext + article.fulltext
         content = self._migrate_content_common(content, to='xml')
         alias = slugify(article.alias)
@@ -383,8 +381,8 @@ class JoomlaMigration(models.TransientModel):
         view = self.env['ir.ui.view'].create(view_values)
         category_path = slugify(article.category_id.path)
         page_url = '/' + category_path + '/' + alias
-        language = article.get_language()
-        language_id = self._find_language_id_by_code(language)
+        language_code = article.get_language()
+        language = self._find_compatible_odoo_language(language_code)
         page_values = {
             'name': article.name,
             'url': page_url,
@@ -392,15 +390,15 @@ class JoomlaMigration(models.TransientModel):
             'website_published': article.state == 1,
             'website_ids': [(4, self.to_website_id.id)],
             'active': article.state == 0 or article.state == 1,
-            'language_id': language_id,
+            'language_id': language.id,
             'from_joomla': True
         }
         page = self.env['website.page'].create(page_values)
         article.write({
             'odoo_page_id': page.id,
-            'odoo_language_id': language_id
+            'odoo_language_id': language.id
         })
-        return page.id
+        return page
 
     @staticmethod
     def _construct_page_view_template(name, content):
@@ -416,8 +414,7 @@ class JoomlaMigration(models.TransientModel):
             </t>
         """.format(name, content)
 
-    def _article_to_blog_post(self, article_id):
-        article = self.env['joomla.article'].browse(article_id)
+    def _article_to_blog_post(self, article):
         main_content = self._migrate_content_common(article.introtext + article.fulltext)
         try:
             images = json.loads(article.images)
@@ -432,8 +429,8 @@ class JoomlaMigration(models.TransientModel):
         if not author:
             author = self.env.user.partner_id
         tags = article.tag_ids.mapped('odoo_blog_tag_id')
-        language = article.get_language()
-        language_id = self._find_language_id_by_code(language)
+        language_code = article.get_language()
+        language = self._find_compatible_odoo_language(language_code)
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': article.name,
@@ -444,15 +441,15 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_keywords': article.metakey,
             'website_meta_description': article.metadesc,
             'tag_ids': [(6, 0, tags.ids)],
-            'language_id': language_id,
+            'language_id': language.id,
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
         article.write({
             'odoo_blog_post_id': post.id,
-            'odoo_language_id': language_id
+            'odoo_language_id': language.id
         })
-        return post.id
+        return post
 
     def _migrate_article_tags(self):
         odoo_tags = self.env['blog.tag'].search([])
@@ -646,7 +643,7 @@ class JoomlaMigration(models.TransientModel):
                 'domain': from_domain
             }
             from_website = self.env['website'].create(values)
-        to_website_url = self._get_website_url(self.to_website_id.id)
+        to_website_url = self._get_website_url(self.to_website_id)
         rules = self._build_redirect_rules()
         rules = OrderedDict(rules)
         for from_url, to_url in rules.items():
@@ -660,10 +657,9 @@ class JoomlaMigration(models.TransientModel):
             }
             self.env['website.redirect'].create(values)
 
-    def _get_website_url(self, website_id):
+    def _get_website_url(self, website):
         request_url = request.httprequest.url_root
         request_url_components = urllib.parse.urlparse(request_url)
-        website = self.env['website'].browse(website_id)
         url = '{}://{}'.format(request_url_components.scheme, website.domain)
         if request_url_components.port:
             url += ':{}'.format(request_url_components.port)
@@ -674,74 +670,37 @@ class JoomlaMigration(models.TransientModel):
 
         articles = self.env['joomla.article'].search([])
         for article in articles:
-            rules.extend(self._build_article_redirect_rules(article.id))
+            from_urls = article.get_urls()
+            if article.odoo_page_id:
+                to_url = article.odoo_page_id.get_url()
+            elif article.odoo_blog_post_id:
+                to_url = article.odoo_blog_post_id.get_url()
+            else:
+                continue
+            rules.extend([(from_url, to_url) for from_url in from_urls])
 
         posts = self.env['joomla.easyblog.post'].search([])
         for post in posts:
-            rules.extend(self._build_easyblog_post_redirect_rules(post.id))
+            if post.odoo_blog_post_id:
+                from_url = post.get_url()
+                to_url = post.odoo_blog_post_id.get_url()
+                rules.append((from_url, to_url))
 
         return rules
 
-    def _build_article_redirect_rules(self, article_id):
-        article = self.env['joomla.article'].browse(article_id)
-        if not article.odoo_page_id and not article.odoo_blog_post_id:
-            return []
-
-        from_urls = []
-        menus = article.menu_ids or article.category_ids.mapped('menu_ids')
-        for menu in menus:
-            if menu.article_id:
-                from_url = '/' + menu.path
-            elif menu.category_id:
-                from_url = '/{}/{}-{}'.format(menu.path,
-                                              article.joomla_id, article.alias)
-            else:
-                continue
-            language = article.get_language()
-            if language and '-' in language:
-                from_url = '/' + language[:2] + from_url
-            from_urls.append(from_url)
-
-        if article.odoo_page_id:
-            to_url = article.odoo_page_id.url
-        else:
-            post = article.odoo_blog_post_id
-            to_url = '/blog/{}-{}/post/{}-{}'.format(
-                slugify(post.blog_id.name), post.blog_id.id,
-                slugify(post.name), post.id)
-
-        if article.odoo_language_id:
-            to_url = '/' + article.odoo_language_id.code + to_url
-        rules = [(from_url, to_url) for from_url in from_urls]
-        return rules
-
-    def _build_easyblog_post_redirect_rules(self, post_id):
-        post = self.env['joomla.easyblog.post'].browse(post_id)
-        if not post.odoo_blog_post_id:
-            return []
-        from_url = '/blog/entry/' + post.permalink
-        language = post.get_language()
-        if language and '-' in language:
-            from_url = '/' + language[:2] + from_url
-        odoo_post = post.odoo_blog_post_id
-        to_url = '/blog/{}-{}/post/{}-{}'.format(
-            slugify(odoo_post.blog_id.name), odoo_post.blog_id.id,
-            slugify(odoo_post.name), odoo_post.id)
-        if post.odoo_language_id:
-            to_url = '/' + post.odoo_language_id.code + to_url
-        return [(from_url, to_url)]
-
-    def _find_language_id_by_code(self, code):
-        if '-' not in code:
+    def _find_compatible_odoo_language(self, joomla_language_code):
+        if '-' not in joomla_language_code:
             return False
-        code = code.replace('-', '_')
+        joomla_language_code = joomla_language_code.replace('-', '_')
         languages = self.env['res.lang'].search([('active', '=', True)])
-        exact_matches = languages.filtered(lambda r: r.code == code)
+        exact_matches = languages.filtered(
+            lambda r: r.code == joomla_language_code)
         if exact_matches:
-            return exact_matches[0].id
-        nearest_matches = languages.filtered(lambda r: r.code.startswith(code[:2]))
+            return exact_matches[0]
+        nearest_matches = languages.filtered(
+            lambda r: r.code.startswith(joomla_language_code[:2]))
         if nearest_matches:
-            return nearest_matches[0].id
+            return nearest_matches[0]
         return False
 
 

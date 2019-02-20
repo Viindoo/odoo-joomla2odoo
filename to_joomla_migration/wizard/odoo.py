@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo.addons.http_routing.models.ir_http import slugify
 
 
 class Partner(models.Model):
@@ -13,11 +14,28 @@ class WebsitePage(models.Model):
 
     from_joomla = fields.Boolean()
 
+    def get_url(self):
+        self.ensure_one()
+        if self.language_id:
+            return '/' + self.language_id.code + self.url
+        return self.url
+
 
 class BlogPost(models.Model):
     _inherit = 'blog.post'
 
     from_joomla = fields.Boolean()
+
+    def get_url(self):
+        self.ensure_one()
+        if self.language_id:
+            url = '/' + self.language_id.code
+        else:
+            url = ''
+        url += '/blog/{}-{}/post/{}-{}'.format(
+            slugify(self.blog_id.name), self.blog_id.id,
+            slugify(self.name), self.id)
+        return url
 
 
 class BlogTag(models.Model):
