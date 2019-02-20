@@ -364,7 +364,6 @@ class JoomlaMigration(models.TransientModel):
         post = self.env['blog.post'].create(post_values)
         e_post.write({
             'odoo_blog_post_id': post.id,
-            'odoo_language_id': language.id
         })
         return post
 
@@ -395,8 +394,7 @@ class JoomlaMigration(models.TransientModel):
         }
         page = self.env['website.page'].create(page_values)
         article.write({
-            'odoo_page_id': page.id,
-            'odoo_language_id': language.id
+            'odoo_page_id': page.id
         })
         return page
 
@@ -446,8 +444,7 @@ class JoomlaMigration(models.TransientModel):
         }
         post = self.env['blog.post'].create(post_values)
         article.write({
-            'odoo_blog_post_id': post.id,
-            'odoo_language_id': language.id
+            'odoo_blog_post_id': post.id
         })
         return post
 

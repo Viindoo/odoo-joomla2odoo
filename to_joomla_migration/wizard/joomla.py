@@ -82,7 +82,6 @@ class JoomlaArticle(models.TransientModel):
     tag_ids = fields.Many2many('joomla.tag', compute='_compute_tags')
     odoo_page_id = fields.Many2one('website.page')
     odoo_blog_post_id = fields.Many2one('blog.post')
-    odoo_language_id = fields.Many2one('res.lang')
     menu_ids = fields.One2many('joomla.menu', 'article_id')
 
     def _compute_categories(self):
@@ -208,7 +207,6 @@ class EasyBlogPost(models.TransientModel):
     meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
     tag_ids = fields.Many2many('joomla.easyblog.tag', compute='_compute_tags')
     odoo_blog_post_id = fields.Many2one('blog.post')
-    odoo_language_id = fields.Many2one('res.lang')
 
     def _compute_tags(self):
         easyblog_tags = self.env['joomla.easyblog.post.tag'].search([])
