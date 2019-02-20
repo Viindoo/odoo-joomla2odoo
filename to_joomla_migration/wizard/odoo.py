@@ -29,6 +29,7 @@ class BlogPost(models.Model):
     def get_url(self):
         self.ensure_one()
         if self.language_id:
+            self = self.with_context(lang=self.language_id.code)
             url = '/' + self.language_id.code
         else:
             url = ''
