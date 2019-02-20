@@ -174,6 +174,9 @@ class JoomlaMigration(models.TransientModel):
         for row in rows:
             values = dict(zip(column_names, row))
             values.update(migration_id=self.id)
+            for k in values:
+                if isinstance(values[k], bytearray):
+                    values[k] = values[k].decode()
             JModel.create(values)
 
     def _prepare_select_query(self, model):
