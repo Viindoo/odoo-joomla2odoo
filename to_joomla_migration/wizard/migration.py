@@ -16,6 +16,7 @@ from odoo import _, api, fields, models
 from odoo.addons.http_routing.models.ir_http import slugify
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
+from odoo.tools import html_sanitize
 
 _logger = logging.getLogger(__name__)
 
@@ -505,7 +506,8 @@ class JoomlaMigration(models.TransientModel):
     def _migrate_content_common(self, content, to='html'):
         if not content:
             return ''
-        et = lxml.html.fromstring(content)
+        clean_content = html_sanitize(content)
+        et = lxml.html.fromstring(clean_content)
 
         # convert image urls
         img_tags = et.findall('.//img')
