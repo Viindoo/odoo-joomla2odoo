@@ -100,6 +100,14 @@ class JoomlaArticle(models.TransientModel):
             article.tag_ids = article_tags.filtered(
                 lambda r: r.article_id == article).mapped('tag_id')
 
+    def get_language(self):
+        self.ensure_one()
+        if self.menu_ids:
+            menu = self.menu_ids[0]
+            if menu.language and '-' in menu.language:
+                return menu.language
+        return self.language
+
 
 class JoomlaTag(models.TransientModel):
     _name = 'joomla.tag'
@@ -189,6 +197,14 @@ class EasyBlogPost(models.TransientModel):
         for post in self:
             post.tag_ids = easyblog_tags.filtered(
                 lambda r: r.post_id == post).mapped('tag_id')
+
+    def get_language(self):
+        self.ensure_one()
+        menu = self.env['joomla.menu'].search(
+            [('easyblog_latest', '=', True)], limit=1)
+        if menu and menu.language and '-' in menu.language:
+            return menu.language
+        return self.language
 
 
 class EasyBlogMeta(models.TransientModel):
