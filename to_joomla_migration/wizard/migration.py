@@ -358,7 +358,7 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_keywords': meta.keywords,
             'website_meta_description': meta.description,
             'tag_ids': [(6, 0, tags.ids)],
-            'language_id': language.id,
+            'language_id': language.id if language else False,
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
@@ -389,7 +389,7 @@ class JoomlaMigration(models.TransientModel):
             'website_published': article.state == 1,
             'website_ids': [(4, self.to_website_id.id)],
             'active': article.state == 0 or article.state == 1,
-            'language_id': language.id,
+            'language_id': language.id if language else False,
             'from_joomla': True
         }
         page = self.env['website.page'].create(page_values)
@@ -439,7 +439,7 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_keywords': article.metakey,
             'website_meta_description': article.metadesc,
             'tag_ids': [(6, 0, tags.ids)],
-            'language_id': language.id,
+            'language_id': language.id if language else False,
             'from_joomla': True
         }
         post = self.env['blog.post'].create(post_values)
