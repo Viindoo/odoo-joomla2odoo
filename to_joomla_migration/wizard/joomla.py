@@ -113,16 +113,16 @@ class JoomlaArticle(models.TransientModel):
         menus = self.menu_ids or self.category_ids.mapped('menu_ids')
         for menu in menus:
             if menu.article_id:
-                from_url = '/' + menu.path
+                url = '/' + menu.path
             elif menu.category_id:
-                from_url = '/{}/{}-{}'.format(
+                url = '/{}/{}-{}'.format(
                     menu.path, self.joomla_id, self.alias)
             else:
                 continue
             language = self.get_language()
             if language and '-' in language:
-                from_url = '/' + language[:2] + from_url
-            urls.append(from_url)
+                url = '/' + language[:2] + url
+            urls.append(url)
         return urls
 
 
