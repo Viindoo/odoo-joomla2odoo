@@ -697,13 +697,18 @@ class JoomlaMigration(models.TransientModel):
                                               article.joomla_id, article.alias)
             else:
                 continue
+            language = article.get_language()
+            if language and '-' in language:
+                from_url = '/' + language[:2] + from_url
             from_urls.append(from_url)
 
         if article.odoo_page_id:
             to_url = article.odoo_page_id.url
         else:
             post = article.odoo_blog_post_id
-            to_url = '/blog/{}/post/{}'.format(post.blog_id.id, post.id)
+            to_url = '/blog/{}-{}/post/{}-{}'.format(
+                slugify(post.blog_id.name), post.blog_id.id,
+                slugify(post.name), post.id)
 
         if article.odoo_language_id:
             to_url = '/' + article.odoo_language_id.code + to_url
@@ -715,8 +720,13 @@ class JoomlaMigration(models.TransientModel):
         if not post.odoo_blog_post_id:
             return []
         from_url = '/blog/entry/' + post.permalink
+        language = post.get_language()
+        if language and '-' in language:
+            from_url = '/' + language[:2] + from_url
         odoo_post = post.odoo_blog_post_id
-        to_url = '/blog/{}/post/{}'.format(odoo_post.blog_id.id, odoo_post.id)
+        to_url = '/blog/{}-{}/post/{}-{}'.format(
+            slugify(odoo_post.blog_id.name), odoo_post.blog_id.id,
+            slugify(odoo_post.name), odoo_post.id)
         if post.odoo_language_id:
             to_url = '/' + post.odoo_language_id.code + to_url
         return [(from_url, to_url)]
