@@ -8,6 +8,7 @@
     'category': '',
     'version': '0.1',
     'depends': [
+        'to_multi_website',
         'to_website_content_language'
     ],
     'data': [

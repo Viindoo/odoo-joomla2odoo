@@ -282,7 +282,8 @@ class JoomlaMigration(models.TransientModel):
                     'login': login,
                     'email': joomla_user.email,
                     'active': not joomla_user.block,
-                    'from_joomla': True
+                    'from_joomla': True,
+                    'website_id': self.to_website_id.id,
                 }
                 if self.no_reset_password:
                     odoo_user = ResUser.with_context(no_reset_password=True).create(values)
@@ -394,7 +395,8 @@ class JoomlaMigration(models.TransientModel):
             'website_ids': [(4, self.to_website_id.id)],
             'active': article.state == 0 or article.state == 1,
             'language_id': language.id if language else False,
-            'from_joomla': True
+            'from_joomla': True,
+            'website_id': self.to_website_id.id
         }
         page = self.env['website.page'].create(page_values)
         article.write({
@@ -597,7 +599,8 @@ class JoomlaMigration(models.TransientModel):
             'datas_fname': name,
             'res_model': 'ir.ui.view',
             'public': True,
-            'from_joomla': True
+            'from_joomla': True,
+            'website_id': self.to_website_id.id
         }
         attach = self.env['ir.attachment'].create(values)
         new_url = '/web/image/{}/{}'.format(attach.id, name)
