@@ -3,16 +3,23 @@ from odoo import api, fields, models, _
 from odoo.addons.http_routing.models.ir_http import slugify
 
 
-class Partner(models.Model):
-    _inherit = 'res.partner'
+class JoomlaMigrationTrack(models.AbstractModel):
+    _name = 'joomla.migration.track'
 
-    from_joomla = fields.Boolean()
+    created_by_migration = fields.Boolean()
+    old_website = fields.Char()
+    old_website_model = fields.Char()
+    old_website_record_id = fields.Integer()
+
+
+class Partner(models.Model):
+    _name = 'res.partner'
+    _inherit = ['res.partner', 'joomla.migration.track']
 
 
 class WebsitePage(models.Model):
-    _inherit = 'website.page'
-
-    from_joomla = fields.Boolean()
+    _name = 'website.page'
+    _inherit = ['website.page', 'joomla.migration.track']
 
     def get_url(self):
         self.ensure_one()
@@ -22,9 +29,8 @@ class WebsitePage(models.Model):
 
 
 class BlogPost(models.Model):
-    _inherit = 'blog.post'
-
-    from_joomla = fields.Boolean()
+    _name = 'blog.post'
+    _inherit = ['blog.post', 'joomla.migration.track']
 
     def get_url(self):
         self.ensure_one()
@@ -40,18 +46,15 @@ class BlogPost(models.Model):
 
 
 class BlogTag(models.Model):
-    _inherit = 'blog.tag'
-
-    from_joomla = fields.Boolean()
+    _name = 'blog.tag'
+    _inherit = ['blog.tag', 'joomla.migration.track']
 
 
 class Attachment(models.Model):
-    _inherit = 'ir.attachment'
-
-    from_joomla = fields.Boolean()
+    _name = 'ir.attachment'
+    _inherit = ['ir.attachment', 'joomla.migration.track']
 
 
 class WebsiteRedirect(models.Model):
-    _inherit = 'website.redirect'
-
-    from_joomla = fields.Boolean()
+    _name = 'website.redirect'
+    _inherit = ['website.redirect', 'joomla.migration.track']

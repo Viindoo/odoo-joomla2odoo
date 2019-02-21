@@ -282,7 +282,10 @@ class JoomlaMigration(models.TransientModel):
                     'login': login,
                     'email': joomla_user.email,
                     'active': not joomla_user.block,
-                    'from_joomla': True,
+                    'created_by_migration': True,
+                    'old_website': self.website_url,
+                    'old_website_model': 'users',
+                    'old_website_record_id': joomla_user.joomla_id,
                     'website_id': self.to_website_id.id,
                 }
                 if self.no_reset_password:
@@ -364,7 +367,10 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_description': meta.description,
             'tag_ids': [(6, 0, tags.ids)],
             'language_id': language.id if language else False,
-            'from_joomla': True
+            'created_by_migration': True,
+            'old_website': self.website_url,
+            'old_website_model': 'easyblog_post',
+            'old_website_record_id': e_post.joomla_id
         }
         post = self.env['blog.post'].create(post_values)
         e_post.write({
@@ -395,7 +401,10 @@ class JoomlaMigration(models.TransientModel):
             'website_ids': [(4, self.to_website_id.id)],
             'active': article.state == 0 or article.state == 1,
             'language_id': language.id if language else False,
-            'from_joomla': True,
+            'created_by_migration': True,
+            'old_website': self.website_url,
+            'old_website_model': 'article',
+            'old_website_record_id': article.joomla_id,
             'website_id': self.to_website_id.id
         }
         page = self.env['website.page'].create(page_values)
@@ -446,7 +455,10 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_description': article.metadesc,
             'tag_ids': [(6, 0, tags.ids)],
             'language_id': language.id if language else False,
-            'from_joomla': True
+            'created_by_migration': True,
+            'old_website': self.website_url,
+            'old_website_model': 'article',
+            'old_website_record_id': article.joomla_id
         }
         post = self.env['blog.post'].create(post_values)
         article.write({
@@ -463,7 +475,7 @@ class JoomlaMigration(models.TransientModel):
             if not odoo_tag:
                 values = {
                     'name': tag.name,
-                    'from_joomla': True
+                    'created_by_migration': True
                 }
                 odoo_tag = self.env['blog.tag'].create(values)
             tag.odoo_blog_tag_id = odoo_tag.id
@@ -477,7 +489,7 @@ class JoomlaMigration(models.TransientModel):
             if not odoo_tag:
                 values = {
                     'name': tag.name,
-                    'from_joomla': True
+                    'created_by_migration': True
                 }
                 odoo_tag = self.env['blog.tag'].create(values)
             tag.odoo_blog_tag_id = odoo_tag.id
@@ -599,7 +611,7 @@ class JoomlaMigration(models.TransientModel):
             'datas_fname': name,
             'res_model': 'ir.ui.view',
             'public': True,
-            'from_joomla': True,
+            'created_by_migration': True,
             'website_id': self.to_website_id.id
         }
         attach = self.env['ir.attachment'].create(values)
@@ -616,27 +628,27 @@ class JoomlaMigration(models.TransientModel):
     def reset(self):
         self.ensure_one()
         self = self.with_context(active_test=False)
-        from_joomla = ('from_joomla', '=', True)
+        created_by_migration = ('created_by_migration', '=', True)
 
         _logger.info('removing website pages')
-        pages = self.env['website.page'].search([from_joomla])
+        pages = self.env['website.page'].search([created_by_migration])
         views = pages.mapped('view_id')
         pages.unlink()
         views.unlink()
 
         _logger.info('removing blog data')
-        self.env['blog.post'].search([from_joomla]).unlink()
-        self.env['blog.tag'].search([from_joomla]).unlink()
+        self.env['blog.post'].search([created_by_migration]).unlink()
+        self.env['blog.tag'].search([created_by_migration]).unlink()
 
         _logger.info('removing image attachments')
-        self.env['ir.attachment'].search([from_joomla]).unlink()
+        self.env['ir.attachment'].search([created_by_migration]).unlink()
 
         _logger.info('removing users')
-        self.env['res.users'].search([from_joomla]).unlink()
-        self.env['res.partner'].search([from_joomla]).unlink()
+        self.env['res.users'].search([created_by_migration]).unlink()
+        self.env['res.partner'].search([created_by_migration]).unlink()
 
         _logger.info('removing redirects')
-        self.env['website.redirect'].search([from_joomla]).unlink()
+        self.env['website.redirect'].search([created_by_migration]).unlink()
 
     def _create_redirects(self):
         from_domain = urllib.parse.urlparse(self.website_url).hostname
@@ -658,7 +670,7 @@ class JoomlaMigration(models.TransientModel):
                 'url_from': from_url,
                 'url_to': to_url,
                 'website_id': from_website.id,
-                'from_joomla': True
+                'created_by_migration': True
             }
             self.env['website.redirect'].create(values)
 
