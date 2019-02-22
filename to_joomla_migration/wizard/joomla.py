@@ -159,15 +159,15 @@ class JoomlaMenu(models.TransientModel):
     path = fields.Char(joomla_column=True)
     link = fields.Char(joomla_column=True)
     language = fields.Char(joomla_column=True)
-    article_joomla_id = fields.Integer(compute='_compute_content', store=True)
+    article_joomla_id = fields.Integer(compute='_compute_params', store=True)
     article_id = fields.Many2one('joomla.article')
-    category_joomla_id = fields.Integer(compute='_compute_content', store=True)
+    category_joomla_id = fields.Integer(compute='_compute_params', store=True)
     category_id = fields.Many2one('joomla.category')
-    easyblog_latest = fields.Boolean('joomla.easyblog', compute='_compute_content',
+    easyblog_latest = fields.Boolean('joomla.easyblog', compute='_compute_params',
                                      store=True)
 
     @api.depends('path')
-    def _compute_content(self):
+    def _compute_params(self):
         for menu in self:
             url_components = urllib.parse.urlparse(menu.link)
             if not url_components.path == 'index.php':
