@@ -594,7 +594,8 @@ class JoomlaMigration(models.TransientModel):
         if not self._is_internal_url(image_url):
             return image_url
 
-        image_url = urllib.parse.quote(image_url)
+        if '%' not in image_url:
+            image_url = urllib.parse.quote(image_url)
         absolute_url = urllib.parse.urljoin(self.website_url, image_url)
         try:
             _logger.info('downloading {}'.format(absolute_url))
