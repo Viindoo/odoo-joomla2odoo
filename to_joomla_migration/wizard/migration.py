@@ -687,10 +687,11 @@ class JoomlaMigration(models.TransientModel):
 
         articles = self.env['joomla.article'].search([])
         for article in articles:
-            from_urls = article.get_urls()
             if article.odoo_page_id:
+                from_urls = article.get_urls()
                 to_url = article.odoo_page_id.get_url()
             elif article.odoo_blog_post_id:
+                from_urls = article.get_urls()
                 to_url = article.odoo_blog_post_id.get_url()
             else:
                 continue
