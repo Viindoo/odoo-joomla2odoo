@@ -538,6 +538,8 @@ class JoomlaMigration(models.TransientModel):
         a_tags = et.findall('.//a')
         for a in a_tags:
             url = a.get('href')
+            if url and url.startswith('mailto:'):
+                continue
             if url and self._is_internal_url(url):
                 new_url = convert_func(url)
                 if not new_url:
