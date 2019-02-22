@@ -389,7 +389,7 @@ class JoomlaMigration(models.TransientModel):
             'arch_base': view_arch
         }
         view = self.env['ir.ui.view'].create(view_values)
-        category_path = slugify(article.category_id.path)
+        category_path = slugify(article.category_id.path, path=True)
         page_url = '/' + category_path + '/' + alias
         language_code = article.get_language()
         language = self._find_compatible_odoo_language(language_code)
