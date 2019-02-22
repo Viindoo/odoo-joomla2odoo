@@ -166,7 +166,7 @@ class JoomlaMenu(models.TransientModel):
     easyblog_latest = fields.Boolean('joomla.easyblog', compute='_compute_params',
                                      store=True)
 
-    @api.depends('path')
+    @api.depends('link')
     def _compute_params(self):
         for menu in self:
             url_components = urllib.parse.urlparse(menu.link)
