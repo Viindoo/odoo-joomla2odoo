@@ -555,10 +555,8 @@ class JoomlaMigration(models.TransientModel):
             post = self.env['joomla.easyblog.post'].search(
                 [('permalink', '=', permalink)], limit=1
             )
-            o_post = post.odoo_blog_post_id
-            if o_post:
-                new_url = '/blog/{}/post/{}'.format(o_post.blog_id.id, o_post.id)
-                return new_url
+            if post.odoo_blog_post_id:
+                return post.odoo_blog_post_id.get_url()
         return False
 
     @staticmethod
