@@ -48,6 +48,7 @@ class JoomlaCategory(models.TransientModel):
 
     joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
+    alias = fields.Char(joomla_column=True)
     path = fields.Char(joomla_column=True)
     extension = fields.Char(joomla_column=True)
     parent_joomla_id = fields.Integer(joomla_column='parent_id')
@@ -108,6 +109,9 @@ class JoomlaArticle(models.TransientModel):
         return self.language
 
     def get_urls(self):
+        """
+        Ref: https://docs.joomla.org/Special:MyLanguage/Search_Engine_Friendly_URLs
+        """
         self.ensure_one()
         urls = []
         menus = self.menu_ids or self.category_ids.mapped('menu_ids')
@@ -115,8 +119,15 @@ class JoomlaArticle(models.TransientModel):
             if menu.article_id:
                 url = '/' + menu.path
             elif menu.category_id:
-                url = '/{}/{}-{}'.format(
-                    menu.path, self.joomla_id, self.alias)
+                url_segments = [menu.path]
+                for category in self.category_ids:
+                    if category != menu.category_id:
+                        url_segments.append('{}-{}'.format(category.joomla_id,
+                                                           category.alias))
+                    else:
+                        break
+                url_segments.append('{}-{}'.format(self.joomla_id, self.alias))
+                url = '/' + '/'.join(url_segments)
             else:
                 continue
             language = self.get_language()
