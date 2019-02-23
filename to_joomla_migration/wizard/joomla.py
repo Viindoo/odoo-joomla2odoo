@@ -188,7 +188,7 @@ class JoomlaMenu(models.TransientModel):
             if option == 'com_content' and _id:
                 if view == 'article':
                     menu.article_joomla_id = int(_id)
-                elif view == 'category':
+                elif view in ['category', 'categories']:
                     menu.category_joomla_id = int(_id)
             elif option == 'com_easyblog' and view == 'latest':
                 menu.easyblog_latest = True
