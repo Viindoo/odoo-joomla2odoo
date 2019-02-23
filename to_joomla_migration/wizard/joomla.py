@@ -113,27 +113,25 @@ class JoomlaArticle(models.TransientModel):
         Ref: https://docs.joomla.org/Special:MyLanguage/Search_Engine_Friendly_URLs
         """
         self.ensure_one()
+        if self.menu_ids:
+            return ['/' + menu.path for menu in self.menu_ids]
+
         urls = []
-        menus = self.menu_ids or self.category_ids.mapped('menu_ids')
-        for menu in menus:
-            if menu.article_id:
-                url = '/' + menu.path
-            elif menu.category_id:
-                url_segments = [menu.path]
-                for category in self.category_ids:
-                    if category != menu.category_id:
-                        url_segments.append('{}-{}'.format(category.joomla_id,
-                                                           category.alias))
-                    else:
-                        break
-                url_segments.append('{}-{}'.format(self.joomla_id, self.alias))
-                url = '/' + '/'.join(url_segments)
-            else:
+        url_category_segments = []
+        for category in self.category_ids:
+            if not category.menu_ids:
+                url_category_segments.append('{}-{}'.format(category.joomla_id,
+                                                            category.alias))
                 continue
-            language = self.get_language()
-            if language and '-' in language:
-                url = '/' + language[:2] + url
-            urls.append(url)
+            for menu in category.menu_ids:
+                url_segments = [menu.path] + url_category_segments
+                url_segments.append('{}-{}'.format(self.joomla_id, self.alias))
+                language = self.get_language()
+                if language and '-' in language:
+                    url_segments.insert(0, language[:2])
+                url = '/' + '/'.join(url_segments)
+                urls.append(url)
+            break
         return urls
 
 
