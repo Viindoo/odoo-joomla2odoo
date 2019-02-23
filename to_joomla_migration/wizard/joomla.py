@@ -1,7 +1,29 @@
 # -*- coding: utf-8 -*-
+import json
 import urllib.parse
 
+import mysql.connector
+
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
+
+
+def _is_lang_code(s):
+    return s and '-' in s
+
+
+def _find_odoo_compat_lang(env, lang):
+    if not _is_lang_code(lang):
+        return False
+    lang = lang.replace('-', '_')
+    active_lang = env['res.lang'].search([('active', '=', True)])
+    exact_matches = active_lang.filtered(lambda r: r.code == lang)
+    if exact_matches:
+        return exact_matches[0]
+    nearest_matches = active_lang.filtered(lambda r: r.code.startswith(lang[:2]))
+    if nearest_matches:
+        return nearest_matches[0]
+    return False
 
 
 class JoomlaModel(models.AbstractModel):
@@ -22,8 +44,104 @@ class JoomlaModel(models.AbstractModel):
     _description = 'Joomla Model Base Class'
     _joomla_table = None
 
+    joomla_id = fields.Integer(joomla_column='id', index=True)
     migration_id = fields.Many2one('joomla.migration', required=True,
                                    ondelete='cascade')
+    m2o_joomla_ids = fields.Char()
+
+    @api.model
+    def _load_data(self, migration):
+        try:
+            connection = mysql.connector.connect(
+                host=migration.host_address,
+                port=migration.host_port,
+                user=migration.db_user,
+                password=migration.db_password,
+                database=migration.db_name)
+        except mysql.connector.Error as e:
+            raise UserError(e.msg)
+
+        try:
+            cursor = connection.cursor()
+            query = self._prepare_select_query(migration)
+            cursor.execute(query)
+            column_names = cursor.column_names
+            rows = cursor.fetchall()
+        except mysql.connector.Error as e:
+            raise UserError(e.msg)
+        finally:
+            connection.close()
+
+        for row in rows:
+            values = dict(zip(column_names, row))
+            for k in values:
+                if isinstance(values[k], bytearray):
+                    values[k] = values[k].decode()
+            m2o_joomla_ids = {}
+            for k in list(values):
+                if k.startswith('joomla_') and k != 'joomla_id':
+                    m2o_joomla_ids[k[7:]] = values.pop(k)
+            values.update(migration_id=migration.id,
+                          m2o_joomla_ids=json.dumps(m2o_joomla_ids))
+            self.create(values)
+
+    @api.model
+    def _prepare_select_query(self, migration):
+        table = self._joomla_table
+        assert isinstance(table, str)
+        if migration.db_table_prefix:
+            table = migration.db_table_prefix + table
+
+        field_map = {}  # field -> field alias
+        for field in self._fields.values():
+            joomla_column = field._attrs.get('joomla_column')
+            if not joomla_column:
+                continue
+            alias = field.name
+            if field.type == 'many2one':
+                alias = 'joomla_' + alias
+            if joomla_column is True:
+                field_map[field.name] = alias
+            elif isinstance(joomla_column, str):
+                field_map[joomla_column] = alias
+
+        select_expr = []
+        for name, alias in field_map.items():
+            if name == alias:
+                select_expr.append('`{}`'.format(name))
+            else:
+                select_expr.append('`{}` as `{}`'.format(name, alias))
+
+        select_expr_s = ', '.join(select_expr)
+        query = """SELECT {} FROM {}""".format(select_expr_s, table)
+        return query
+
+    @api.model
+    def _resolve_m2o_fields(self):
+        m2o_joomla_fields = []
+        for field in self._fields.values():
+            if field.type == 'many2one' and field._attrs.get('joomla_column'):
+                m2o_joomla_fields.append(field)
+
+        if not m2o_joomla_fields:
+            return
+
+        records = self.search([])
+        for r in records:
+            values = {}
+            m2o_joomla_ids = json.loads(r.m2o_joomla_ids)
+            for field in m2o_joomla_fields:
+                domain = [('joomla_id', '=', m2o_joomla_ids[field.name])]
+                ref = self.env[field.comodel_name].search(domain, limit=1)
+                values[field.name] = ref.id
+            r.write(values)
+
+    @api.model
+    def _done(self):
+        """
+        Executed after all models are loaded and m2o fields are resolved.
+        """
+        pass
 
 
 class JoomlaUser(models.TransientModel):
@@ -32,7 +150,6 @@ class JoomlaUser(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'users'
 
-    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column=True)
     username = fields.Char(joomla_column=True)
     email = fields.Char(joomla_column=True)
@@ -46,14 +163,13 @@ class JoomlaCategory(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'categories'
 
-    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     alias = fields.Char(joomla_column=True)
     path = fields.Char(joomla_column=True)
-    extension = fields.Char(joomla_column=True)
-    parent_joomla_id = fields.Integer(joomla_column='parent_id')
-    parent_id = fields.Many2one('joomla.category')
+    language = fields.Char(joomla_column=True)
+    parent_id = fields.Many2one('joomla.category', joomla_column=True)
     menu_ids = fields.One2many('joomla.menu', 'category_id')
+    extension = fields.Char(joomla_column=True)
 
 
 class JoomlaArticle(models.TransientModel):
@@ -62,28 +178,27 @@ class JoomlaArticle(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'content'
 
-    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     alias = fields.Char(joomla_column=True)
-    author_joomla_id = fields.Integer(joomla_column='created_by')
-    author_id = fields.Many2one('joomla.user')
+    author_id = fields.Many2one('joomla.user', joomla_column='created_by')
     introtext = fields.Text(joomla_column=True)
     fulltext = fields.Text(joomla_column=True)
     images = fields.Text(joomla_column=True)
     created = fields.Datetime(joomla_column=True)
     publish_up = fields.Datetime(joomla_column=True)
     state = fields.Integer(joomla_column=True)
-    category_joomla_id = fields.Integer(joomla_column='catid')
-    category_id = fields.Many2one('joomla.category')
+    category_id = fields.Many2one('joomla.category', joomla_column='catid')
     category_ids = fields.Many2many('joomla.category',
                                     compute='_compute_categories')
     language = fields.Char(joomla_column=True)
     metakey = fields.Text(joomla_column=True)
     metadesc = fields.Text(joomla_column=True)
     tag_ids = fields.Many2many('joomla.tag', compute='_compute_tags')
+    menu_ids = fields.One2many('joomla.menu', 'article_id')
+    sef_url = fields.Char(index=True)
     odoo_page_id = fields.Many2one('website.page')
     odoo_blog_post_id = fields.Many2one('blog.post')
-    menu_ids = fields.One2many('joomla.menu', 'article_id')
+    odoo_compat_lang_id = fields.Many2one('res.lang')
 
     def _compute_categories(self):
         for article in self:
@@ -95,44 +210,60 @@ class JoomlaArticle(models.TransientModel):
             article.category_ids = categories
 
     def _compute_tags(self):
-        article_tags = self.env['joomla.article.tag'].search([])
         for article in self:
-            article.tag_ids = article_tags.filtered(
-                lambda r: r.article_id == article).mapped('tag_id')
+            article.tag_ids = self.env['joomla.article.tag'].search(
+                [('article_id', '=', article.id)]).mapped('tag_id')
 
-    def get_language(self):
-        self.ensure_one()
-        if self.menu_ids:
-            menu = self.menu_ids[0]
-            if menu.language and '-' in menu.language:
-                return menu.language
-        return self.language
+    @api.model
+    def _done(self):
+        super(JoomlaArticle, self)._done()
+        articles = self.search([])
+        articles._compute_language()
+        articles._compute_url()
 
-    def get_urls(self):
+    def _compute_language(self):
+        for article in self:
+            if not _is_lang_code(article.language) and article.menu_ids:
+                menu = article.menu_ids[0]
+                while menu.parent_id:
+                    if _is_lang_code(menu.language):
+                        article.language = menu.language
+                        break
+                    menu = menu.parent_id
+            if not _is_lang_code(article.language):
+                for category in article.category_ids:
+                    if _is_lang_code(category.language):
+                        article.language = category.language
+                        break
+            compat_lang = _find_odoo_compat_lang(self.env, article.language)
+            if compat_lang:
+                article.odoo_compat_lang_id = compat_lang.id
+
+    def _compute_url(self):
         """
         Ref: https://docs.joomla.org/Special:MyLanguage/Search_Engine_Friendly_URLs
         """
-        self.ensure_one()
-        if self.menu_ids:
-            return ['/' + menu.path for menu in self.menu_ids]
-
-        urls = []
-        url_category_segments = []
-        for category in self.category_ids:
-            if not category.menu_ids:
-                url_category_segments.append('{}-{}'.format(category.joomla_id,
-                                                            category.alias))
+        for article in self:
+            url = False
+            if article.menu_ids:
+                url = '/' + article.menu_ids[0].path
+            else:
+                url_category_segments = []
+                for category in article.category_ids[:-1]:
+                    if not category.menu_ids:
+                        seg = '{}-{}'.format(category.joomla_id, category.alias)
+                        url_category_segments.append(seg)
+                        continue
+                    menu = category.menu_ids[0]
+                    seg = '{}-{}'.format(article.joomla_id, article.alias)
+                    url_segments = [menu.path, *url_category_segments, seg]
+                    url = '/' + '/'.join(url_segments)
+                    break
+            if not url:
                 continue
-            for menu in category.menu_ids:
-                url_segments = [menu.path] + url_category_segments
-                url_segments.append('{}-{}'.format(self.joomla_id, self.alias))
-                language = self.get_language()
-                if language and '-' in language:
-                    url_segments.insert(0, language[:2])
-                url = '/' + '/'.join(url_segments)
-                urls.append(url)
-            break
-        return urls
+            if _is_lang_code(article.language):
+                url = '/' + article.language[:2] + url
+            article.sef_url = url
 
 
 class JoomlaTag(models.TransientModel):
@@ -141,7 +272,6 @@ class JoomlaTag(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'tags'
 
-    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     odoo_blog_tag_id = fields.Many2one('blog.tag')
 
@@ -152,10 +282,9 @@ class JoomlaArticleTag(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'contentitem_tag_map'
 
-    article_joomla_id = fields.Integer(joomla_column='content_item_id')
-    article_id = fields.Many2one('joomla.article')
-    tag_joomla_id = fields.Integer(joomla_column='tag_id')
-    tag_id = fields.Many2one('joomla.tag')
+    joomla_id = False
+    article_id = fields.Many2one('joomla.article', joomla_column='content_item_id')
+    tag_id = fields.Many2one('joomla.tag', joomla_column=True)
 
 
 class JoomlaMenu(models.TransientModel):
@@ -164,18 +293,19 @@ class JoomlaMenu(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'menu'
 
-    joomla_id = fields.Integer(joomla_column='id')
+    parent_id = fields.Many2one('joomla.menu', joomla_column=True)
     path = fields.Char(joomla_column=True)
     link = fields.Char(joomla_column=True)
     language = fields.Char(joomla_column=True)
-    article_joomla_id = fields.Integer(compute='_compute_params', store=True)
     article_id = fields.Many2one('joomla.article')
-    category_joomla_id = fields.Integer(compute='_compute_params', store=True)
     category_id = fields.Many2one('joomla.category')
-    easyblog_latest = fields.Boolean('joomla.easyblog', compute='_compute_params',
-                                     store=True)
+    easyblog = fields.Boolean()
 
-    @api.depends('link')
+    @api.model
+    def _resolve_m2o_fields(self):
+        super(JoomlaMenu, self)._resolve_m2o_fields()
+        self.search([])._compute_params()
+
     def _compute_params(self):
         for menu in self:
             url_components = urllib.parse.urlparse(menu.link)
@@ -184,14 +314,16 @@ class JoomlaMenu(models.TransientModel):
             query = dict(urllib.parse.parse_qsl(url_components.query))
             option = query.get('option')
             view = query.get('view')
-            _id = query.get('id')
-            if option == 'com_content' and _id:
+            jid = int(query.get('id', False))
+            if option == 'com_content' and jid:
                 if view == 'article':
-                    menu.article_joomla_id = int(_id)
+                    menu.article_id = self.env['joomla.article'].search(
+                        [('joomla_id', '=', jid)], limit=1).id
                 elif view in ['category', 'categories']:
-                    menu.category_joomla_id = int(_id)
+                    menu.category_id = self.env['joomla.category'].search(
+                        [('joomla_id', '=', jid)], limit=1).id
             elif option == 'com_easyblog' and view == 'latest':
-                menu.easyblog_latest = True
+                menu.easyblog = True
 
 
 class EasyBlogPost(models.TransientModel):
@@ -200,11 +332,9 @@ class EasyBlogPost(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'easyblog_post'
 
-    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     permalink = fields.Char(joomla_column=True)
-    author_joomla_id = fields.Integer(joomla_column='created_by')
-    author_id = fields.Many2one('joomla.user')
+    author_id = fields.Many2one('joomla.user', joomla_column='created_by')
     intro = fields.Text(joomla_column=True)
     content = fields.Text(joomla_column=True)
     image = fields.Text(joomla_column=True)
@@ -215,29 +345,39 @@ class EasyBlogPost(models.TransientModel):
     language = fields.Char(joomla_column=True)
     meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
     tag_ids = fields.Many2many('joomla.easyblog.tag', compute='_compute_tags')
+    sef_url = fields.Char(index=True)
     odoo_blog_post_id = fields.Many2one('blog.post')
+    odoo_compat_lang_id = fields.Many2one('res.lang')
 
     def _compute_tags(self):
-        easyblog_tags = self.env['joomla.easyblog.post.tag'].search([])
         for post in self:
-            post.tag_ids = easyblog_tags.filtered(
-                lambda r: r.post_id == post).mapped('tag_id')
+            post.tag_ids = self.env['joomla.easyblog.post.tag'].search(
+                [('post_id', '=', post.id)]).mapped('tag_id')
 
-    def get_language(self):
-        self.ensure_one()
-        menu = self.env['joomla.menu'].search(
-            [('easyblog_latest', '=', True)], limit=1)
-        if menu and menu.language and '-' in menu.language:
-            return menu.language
-        return self.language
+    @api.model
+    def _done(self):
+        super(EasyBlogPost, self)._done()
+        posts = self.search([])
+        posts._compute_language()
+        posts._compute_url()
 
-    def get_url(self):
-        self.ensure_one()
-        url = '/blog/entry/' + self.permalink
-        language = self.get_language()
-        if language and '-' in language:
-            url = '/' + language[:2] + url
-        return url
+    def _compute_language(self):
+        for post in self:
+            if not _is_lang_code(post.language):
+                menu = self.env['joomla.menu'].search(
+                    [('easyblog', '=', True)], limit=1)
+                if menu and _is_lang_code(menu.language):
+                    post.language = menu.language
+            compat_lang = _find_odoo_compat_lang(self.env, post.language)
+            if compat_lang:
+                post.odoo_compat_lang_id = compat_lang.id
+
+    def _compute_url(self):
+        for post in self:
+            url = '/blog/entry/' + post.permalink
+            if _is_lang_code(post.language):
+                url = '/' + post.language[:2] + url
+            post.sef_url = url
 
 
 class EasyBlogMeta(models.TransientModel):
@@ -246,10 +386,8 @@ class EasyBlogMeta(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'easyblog_meta'
 
-    joomla_id = fields.Integer(joomla_column='id')
     type = fields.Char(joomla_column=True)
-    content_joomla_id = fields.Integer(joomla_column='content_id')
-    content_id = fields.Many2one('joomla.easyblog.post')
+    content_id = fields.Many2one('joomla.easyblog.post', joomla_column=True)
     keywords = fields.Text(joomla_column=True)
     description = fields.Text(joomla_column=True)
 
@@ -260,7 +398,6 @@ class EasyBlogTag(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'easyblog_tag'
 
-    joomla_id = fields.Integer(joomla_column='id')
     name = fields.Char(joomla_column='title')
     odoo_blog_tag_id = fields.Many2one('blog.tag')
 
@@ -271,7 +408,6 @@ class EasyBlogPostTag(models.TransientModel):
     _inherit = 'joomla.model'
     _joomla_table = 'easyblog_post_tag'
 
-    tag_joomla_id = fields.Integer(joomla_column='tag_id')
-    tag_id = fields.Many2one('joomla.easyblog.tag')
-    post_joomla_id = fields.Integer(joomla_column='post_id')
-    post_id = fields.Many2one('joomla.easyblog.post')
+    joomla_id = False
+    tag_id = fields.Many2one('joomla.easyblog.tag', joomla_column=True)
+    post_id = fields.Many2one('joomla.easyblog.post', joomla_column=True)

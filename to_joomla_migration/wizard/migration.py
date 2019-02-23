@@ -5,12 +5,11 @@ import logging
 import re
 import urllib.parse
 import urllib.request
-from collections import OrderedDict
 from datetime import datetime
 from json import JSONDecodeError
 
+import lxml.etree
 import lxml.html
-import mysql.connector
 
 from odoo import _, api, fields, models
 from odoo.addons.http_routing.models.ir_http import slugify
@@ -89,7 +88,7 @@ class JoomlaMigration(models.TransientModel):
         if not self._load_data():
             raise UserError(_('No data to migrate!'))
         if self.include_user:
-            self._initialize_user_mapping()
+            self._init_user_mapping()
         _logger.info('loading completed')
 
         self.state = 'migrating'
@@ -104,38 +103,19 @@ class JoomlaMigration(models.TransientModel):
             'target': 'new',
         }
 
-    def _get_migrating_info(self):
-        info = 'Found data:\n'
-        if self.include_user:
-            info += '- {} users\n'.format(len(self.user_ids))
-        if self.include_article:
-            info += '- {} articles\n'.format(len(self.article_ids))
-        if self.include_easyblog:
-            info += '- {} easyblog posts\n'.format(len(self.easyblog_post_ids))
-        return info
-
     def _load_data(self):
-        joomla_models = self._get_joomla_models()
+        joomla_models = self._registered_joomla_models()
         for model in joomla_models:
-            self._import_joomla_model(model)
-            _logger.info('imported {}'.format(model))
+            self.env[model]._load_data(self)
+            _logger.info('loaded {}'.format(model))
         for model in joomla_models:
-            self._sync_id(model)
+            self.env[model]._resolve_m2o_fields()
+            _logger.info('resolved m2o fields in {}'.format(model))
+        for model in joomla_models:
+            self.env[model]._done()
         return joomla_models
 
-    def _initialize_user_mapping(self):
-        odoo_users = self.env['res.users'].with_context(active_test=False).search([])
-        email_map_user = {r.email: r for r in odoo_users}
-        for joomla_user in self.user_ids:
-            odoo_user = email_map_user.get(joomla_user.email)
-            if odoo_user:
-                self.env['joomla.migration.user.mapping'].create({
-                    'migration_id': self.id,
-                    'joomla_user_id': joomla_user.id,
-                    'odoo_user_id': odoo_user.id
-                })
-
-    def _get_joomla_models(self):
+    def _registered_joomla_models(self):
         joomla_models = []
         if self.include_user:
             joomla_models.extend(['joomla.user'])
@@ -149,100 +129,35 @@ class JoomlaMigration(models.TransientModel):
             joomla_models.extend(['joomla.menu'])
         return joomla_models
 
-    def _import_joomla_model(self, model):
-        JModel = self.env[model]
+    def _init_user_mapping(self):
+        odoo_users = self.env['res.users'].with_context(active_test=False).search([])
+        email_map_user = {r.email: r for r in odoo_users}
+        for joomla_user in self.user_ids:
+            odoo_user = email_map_user.get(joomla_user.email)
+            if odoo_user:
+                self.env['joomla.migration.user.mapping'].create({
+                    'migration_id': self.id,
+                    'joomla_user_id': joomla_user.id,
+                    'odoo_user_id': odoo_user.id
+                })
 
-        try:
-            connection = mysql.connector.connect(
-                host=self.host_address, port=self.host_port,
-                user=self.db_user, password=self.db_password,
-                database=self.db_name)
-        except mysql.connector.Error as e:
-            raise UserError(e.msg)
-
-        try:
-            cursor = connection.cursor()
-            query = self._prepare_select_query(model)
-            cursor.execute(query)
-            column_names = cursor.column_names
-            rows = cursor.fetchall()
-        except mysql.connector.Error as e:
-            raise UserError(e.msg)
-        finally:
-            connection.close()
-
-        JModel.search([('migration_id', '=', self.id)]).unlink()
-        for row in rows:
-            values = dict(zip(column_names, row))
-            values.update(migration_id=self.id)
-            for k in values:
-                if isinstance(values[k], bytearray):
-                    values[k] = values[k].decode()
-            JModel.create(values)
-
-    def _prepare_select_query(self, model):
-        JModel = self.env[model]
-        table = JModel._joomla_table
-        if self.db_table_prefix:
-            table = self.db_table_prefix + table
-
-        field_map = {}  # odoo field name -> joomla field name
-        for field in JModel._fields.values():
-            joomla_column = field._attrs.get('joomla_column')
-            if not joomla_column:
-                continue
-            if joomla_column is True:
-                field_map[field.name] = field.name
-            elif isinstance(joomla_column, str):
-                field_map[field.name] = joomla_column
-
-        select_expr = []
-        for odoo_field, joomla_field in field_map.items():
-            if odoo_field == joomla_field:
-                select_expr.append('`{}`'.format(joomla_field))
-            else:
-                select_expr.append('`{}` as `{}`'.format(joomla_field, odoo_field))
-
-        select_expr_s = ', '.join(select_expr)
-        query = """SELECT {} FROM {}""".format(select_expr_s, table)
-        return query
-
-    def _sync_id(self, model):
-        """
-        Compute odoo id based on corresponding joomla id.
-
-        Mapping between joomla id field and odoo id field is determined
-        by naming convention, example: x_joomla_id -> x_id
-        """
-        JModel = self.env[model]
-        field_map = {}  # joomla field -> joomla field
-        for field in JModel._fields.values():
-            if field.name.endswith('_joomla_id'):
-                joomla_field = field
-                odoo_name = field.name.replace('joomla_id', 'id')
-                if odoo_name in JModel._fields:
-                    odoo_field = JModel._fields[odoo_name]
-                    field_map[joomla_field] = odoo_field
-
-        if not field_map:
-            return
-
-        records = JModel.search([])
-        for r in records:
-            values = {}
-            for joomla_field, odoo_field in field_map.items():
-                domain = [('migration_id', '=', r.migration_id.id),
-                          ('joomla_id', '=', getattr(r, joomla_field.name))]
-                comodel = self.env[odoo_field.comodel_name]
-                record = comodel.search(domain, limit=1)
-                values[odoo_field.name] = record.id
-            r.write(values)
+    def _get_migrating_info(self):
+        info = 'Found data:\n'
+        if self.include_user:
+            info += '- {} users\n'.format(len(self.user_ids))
+        if self.include_article:
+            info += '- {} articles\n'.format(len(self.article_ids))
+        if self.include_easyblog:
+            info += '- {} easyblog posts\n'.format(len(self.easyblog_post_ids))
+        return info
 
     def migrate_data(self):
         self.ensure_one()
         _logger.info('start migrating data')
         start = datetime.now()
+        request.url_map = {}
         self.with_context(active_test=False)._migrate_data()
+        self.with_context(active_test=False)._update_href()
         if self.redirect:
             self._create_redirects()
         time = datetime.now() - start
@@ -312,110 +227,21 @@ class JoomlaMigration(models.TransientModel):
 
         total = len(page_articles)
         for idx, article in enumerate(page_articles, start=1):
-            self._article_to_page(article)
+            self._migrate_article_to_page(article)
             _logger.info('[{}/{}] created page {}'
                          .format(idx, total, article.alias))
 
         total = len(blog_articles)
         for idx, article in enumerate(blog_articles, start=1):
-            self._article_to_blog_post(article)
+            self._migrate_article_to_blog_post(article)
             _logger.info('[{}/{}] created blog post {}'
                          .format(idx, total, article.alias))
 
-    def _migrate_easyblog(self):
-        posts = self.easyblog_post_ids
-        total = len(posts)
-        for idx, post in enumerate(posts, start=1):
-            self._convert_easyblog_post(post)
-            _logger.info('[{}/{}] created blog post {}'
-                         .format(idx, total, post.permalink))
-
-        new_posts = posts.mapped('odoo_blog_post_id')
-        for post in new_posts:
-            _logger.info('updating href in blog post {}'.format(post.name))
-            content = self._convert_href(post.content, self._convert_easyblog_href)
-            post.content = content
-
-    def _convert_easyblog_post(self, e_post):
-        main_content = self._migrate_easyblog_content(e_post.intro + e_post.content)
-        if not e_post.image:
-            intro_image_url = None
-        elif e_post.image.startswith('shared/'):
-            intro_image_url = 'images/easyblog_shared/' + e_post.image[7:]
-        elif e_post.image.startswith('user:'):
-            intro_image_url = 'images/easyblog_images/' + e_post.image[5:]
-        else:
-            intro_image_url = None
-        intro_image_url = self._migrate_image(intro_image_url)
-        content = self._construct_blog_post_content(main_content, intro_image_url)
-        author = e_post.author_id.odoo_user_id.partner_id
-        meta = e_post.meta_ids.filtered(lambda r: r.type == 'post')
-        if not author:
-            author = self.env.user.partner_id
-        tags = e_post.tag_ids.mapped('odoo_blog_tag_id')
-        language_code = e_post.get_language()
-        language = self._find_compatible_odoo_language(language_code)
-        post_values = {
-            'blog_id': self.to_blog_id.id,
-            'name': e_post.name,
-            'author_id': author.id,
-            'content': content,
-            'website_published': e_post.published == 1,
-            'post_date': e_post.publish_up or e_post.created,
-            'active': e_post.state == 0,
-            'website_meta_keywords': meta.keywords,
-            'website_meta_description': meta.description,
-            'tag_ids': [(6, 0, tags.ids)],
-            'language_id': language.id if language else False,
-            'created_by_migration': True,
-            'old_website': self.website_url,
-            'old_website_model': 'easyblog_post',
-            'old_website_record_id': e_post.joomla_id
-        }
-        post = self.env['blog.post'].create(post_values)
-        e_post.write({
-            'odoo_blog_post_id': post.id,
-        })
-        return post
-
-    def _article_to_page(self, article):
+    def _migrate_article_to_page(self, article):
         content = article.introtext + article.fulltext
-        content = self._migrate_content_common(content, to='xml')
+        content = self._convert_content_common(content, 'xml')
         alias = slugify(article.alias)
-        view_arch = self._construct_page_view_template(alias, content)
-        view_values = {
-            'name': article.name,
-            'type': 'qweb',
-            'arch_base': view_arch
-        }
-        view = self.env['ir.ui.view'].create(view_values)
-        category_path = slugify(article.category_id.path, path=True)
-        page_url = '/' + category_path + '/' + alias
-        language_code = article.get_language()
-        language = self._find_compatible_odoo_language(language_code)
-        page_values = {
-            'name': article.name,
-            'url': page_url,
-            'view_id': view.id,
-            'website_published': article.state == 1,
-            'website_ids': [(4, self.to_website_id.id)],
-            'active': article.state == 0 or article.state == 1,
-            'language_id': language.id if language else False,
-            'created_by_migration': True,
-            'old_website': self.website_url,
-            'old_website_model': 'article',
-            'old_website_record_id': article.joomla_id,
-            'website_id': self.to_website_id.id
-        }
-        page = self.env['website.page'].create(page_values)
-        article.write({
-            'odoo_page_id': page.id
-        })
-        return page
-
-    @staticmethod
-    def _construct_page_view_template(name, content):
-        return """
+        view_arch = """
             <t t-name="website.{}">
                 <t t-call="website.layout">
                     <div id="wrap" class="oe_structure oe_empty">
@@ -424,11 +250,37 @@ class JoomlaMigration(models.TransientModel):
                         </div>
                     </div>
                 </t>
-            </t>
-        """.format(name, content)
+            </t>""".format(alias, content)
+        view_values = {
+            'name': article.name,
+            'type': 'qweb',
+            'arch_base': view_arch
+        }
+        view = self.env['ir.ui.view'].create(view_values)
+        category_path = slugify(article.category_id.path, path=True)
+        page_url = '/' + category_path + '/' + alias
+        page_values = {
+            'name': article.name,
+            'url': page_url,
+            'view_id': view.id,
+            'website_published': article.state == 1,
+            'website_ids': [(4, self.to_website_id.id)],
+            'active': article.state == 0 or article.state == 1,
+            'language_id': article.odoo_compat_lang_id.id,
+            'created_by_migration': True,
+            'old_website': self.website_url,
+            'old_website_model': 'article',
+            'old_website_record_id': article.joomla_id,
+            'website_id': self.to_website_id.id
+        }
+        page = self.env['website.page'].create(page_values)
+        article.odoo_page_id = page.id
+        if article.sef_url:
+            request.url_map[article.sef_url] = page.sef_url
+        return page
 
-    def _article_to_blog_post(self, article):
-        main_content = self._migrate_content_common(article.introtext + article.fulltext)
+    def _migrate_article_to_blog_post(self, article):
+        main_content = self._convert_content_common(article.introtext + article.fulltext)
         try:
             images = json.loads(article.images)
         except JSONDecodeError:
@@ -437,13 +289,11 @@ class JoomlaMigration(models.TransientModel):
         else:
             intro_image_url = images.get('image_intro')
             intro_image_url = self._migrate_image(intro_image_url)
-        content = self._construct_blog_post_content(main_content, intro_image_url)
+        content = self._build_blog_post_content(main_content, intro_image_url)
         author = article.author_id.odoo_user_id.partner_id
         if not author:
             author = self.env.user.partner_id
         tags = article.tag_ids.mapped('odoo_blog_tag_id')
-        language_code = article.get_language()
-        language = self._find_compatible_odoo_language(language_code)
         post_values = {
             'blog_id': self.to_blog_id.id,
             'name': article.name,
@@ -454,16 +304,16 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_keywords': article.metakey,
             'website_meta_description': article.metadesc,
             'tag_ids': [(6, 0, tags.ids)],
-            'language_id': language.id if language else False,
+            'language_id': article.odoo_compat_lang_id.id,
             'created_by_migration': True,
             'old_website': self.website_url,
             'old_website_model': 'article',
             'old_website_record_id': article.joomla_id
         }
         post = self.env['blog.post'].create(post_values)
-        article.write({
-            'odoo_blog_post_id': post.id
-        })
+        article.odoo_blog_post_id = post.id
+        if article.sef_url:
+            request.url_map[article.sef_url] = post.sef_url
         return post
 
     def _migrate_article_tags(self):
@@ -480,22 +330,56 @@ class JoomlaMigration(models.TransientModel):
                 odoo_tag = self.env['blog.tag'].create(values)
             tag.odoo_blog_tag_id = odoo_tag.id
 
-    def _migrate_easyblog_tags(self):
-        odoo_tags = self.env['blog.tag'].search([])
-        odoo_tag_names = {r.name: r for r in odoo_tags}
-        easyblog_tags = self.env['joomla.easyblog.tag'].search([])
-        for tag in easyblog_tags:
-            odoo_tag = odoo_tag_names.get(tag.name)
-            if not odoo_tag:
-                values = {
-                    'name': tag.name,
-                    'created_by_migration': True
-                }
-                odoo_tag = self.env['blog.tag'].create(values)
-            tag.odoo_blog_tag_id = odoo_tag.id
+    def _migrate_easyblog(self):
+        posts = self.easyblog_post_ids
+        total = len(posts)
+        for idx, post in enumerate(posts, start=1):
+            self._migrate_easyblog_post(post)
+            _logger.info('[{}/{}] created blog post {}'
+                         .format(idx, total, post.permalink))
+
+    def _migrate_easyblog_post(self, post):
+        main_content = self._convert_easyblog_content(post.intro + post.content)
+        if not post.image:
+            intro_image_url = None
+        elif post.image.startswith('shared/'):
+            intro_image_url = 'images/easyblog_shared/' + post.image[7:]
+        elif post.image.startswith('user:'):
+            intro_image_url = 'images/easyblog_images/' + post.image[5:]
+        else:
+            intro_image_url = None
+        intro_image_url = self._migrate_image(intro_image_url)
+        content = self._build_blog_post_content(main_content, intro_image_url)
+        author = post.author_id.odoo_user_id.partner_id
+        meta = post.meta_ids.filtered(lambda r: r.type == 'post')
+        if not author:
+            author = self.env.user.partner_id
+        tags = post.tag_ids.mapped('odoo_blog_tag_id')
+        post_values = {
+            'blog_id': self.to_blog_id.id,
+            'name': post.name,
+            'author_id': author.id,
+            'content': content,
+            'website_published': post.published == 1,
+            'post_date': post.publish_up or post.created,
+            'active': post.state == 0,
+            'website_meta_keywords': meta.keywords,
+            'website_meta_description': meta.description,
+            'tag_ids': [(6, 0, tags.ids)],
+            'language_id': post.odoo_compat_lang_id.id,
+            'created_by_migration': True,
+            'old_website': self.website_url,
+            'old_website_model': 'easyblog_post',
+            'old_website_record_id': post.joomla_id
+        }
+        new_post = self.env['blog.post'].create(post_values)
+        post.odoo_blog_post_id = new_post.id
+        if post.sef_url:
+            request.url_map[post.sef_url] = new_post.sef_url
+        return new_post
 
     @staticmethod
-    def _construct_blog_post_content(main_content, intro_image_url=None):
+    def _build_blog_post_content(main_content, intro_image_url=None):
         content = """
             <section class="s_text_block">
                 <div class="container">
@@ -512,57 +396,13 @@ class JoomlaMigration(models.TransientModel):
             content = image + content
         return content
 
-    def _migrate_easyblog_content(self, content):
-        content = self._migrate_content_common(content)
-        content = self._convert_easyblog_embed_video(content)
+    def _convert_easyblog_content(self, content):
+        content = self._convert_content_common(content)
+        content = self._convert_easyblog_embed_video_code(content)
         return content
 
-    def _migrate_content_common(self, content, to='html'):
-        if not content:
-            return ''
-        clean_content = html_sanitize(content)
-        et = lxml.html.fromstring(clean_content)
-
-        # convert image urls
-        img_tags = et.findall('.//img')
-        for img in img_tags:
-            url = img.get('src')
-            if url:
-                new_url = self._migrate_image(url)
-                img.set('src', new_url)
-
-        return lxml.html.tostring(et, encoding='unicode', method=to)
-
-    def _convert_href(self, content, convert_func):
-        et = lxml.html.fromstring(content)
-        a_tags = et.findall('.//a')
-        for a in a_tags:
-            url = a.get('href')
-            if url and url.startswith('mailto:'):
-                continue
-            if url and self._is_internal_url(url):
-                new_url = convert_func(url)
-                if not new_url:
-                    a.drop_tag()
-                    _logger.info('dropped href {}'.format(url))
-                else:
-                    a.set('href', new_url)
-                    _logger.info('converted href from {} to {}'.format(url, new_url))
-        return lxml.html.tostring(et, encoding='unicode')
-
-    def _convert_easyblog_href(self, url):
-        segments = url.split('/')
-        if len(segments) > 2 and segments[-3:-1] == ['blog', 'entry']:
-            permalink = segments[-1]
-            post = self.env['joomla.easyblog.post'].search(
-                [('permalink', '=', permalink)], limit=1
-            )
-            if post.odoo_blog_post_id:
-                return post.odoo_blog_post_id.get_url()
-        return False
-
     @staticmethod
-    def _convert_easyblog_embed_video(content):
+    def _convert_easyblog_embed_video_code(content):
         matches = re.finditer(r'\[embed=videolink\](.*)\[/embed\]', content)
         code_map = {}
         for match in matches:
@@ -587,6 +427,36 @@ class JoomlaMigration(models.TransientModel):
         for old_code, new_code in code_map.items():
             content = content.replace(old_code, new_code)
         return content
+
+    def _migrate_easyblog_tags(self):
+        odoo_tags = self.env['blog.tag'].search([])
+        odoo_tag_names = {r.name: r for r in odoo_tags}
+        easyblog_tags = self.env['joomla.easyblog.tag'].search([])
+        for tag in easyblog_tags:
+            odoo_tag = odoo_tag_names.get(tag.name)
+            if not odoo_tag:
+                values = {
+                    'name': tag.name,
+                    'created_by_migration': True
+                }
+                odoo_tag = self.env['blog.tag'].create(values)
+            tag.odoo_blog_tag_id = odoo_tag.id
+
+    def _convert_content_common(self, content, to='html'):
+        if not content:
+            return ''
+        clean_content = html_sanitize(content)
+        et = lxml.html.fromstring(clean_content)
+
+        # convert image urls
+        img_tags = et.findall('.//img')
+        for img in img_tags:
+            url = img.get('src')
+            if url:
+                new_url = self._migrate_image(url)
+                img.set('src', new_url)
+
+        return lxml.html.tostring(et, encoding='unicode', method=to)
 
     def _migrate_image(self, image_url):
         if not image_url:
@@ -619,12 +489,80 @@ class JoomlaMigration(models.TransientModel):
         new_url = '/web/image/{}/{}'.format(attach.id, name)
         return new_url
 
+    def _update_href(self):
+        created_by_migration = ('created_by_migration', '=', True)
+
+        new_pages = self.env['website.page'].search([created_by_migration])
+        for page in new_pages:
+            _logger.info('updating href in page {}'.format(page.name))
+            content = self._update_href_for_content(page.view_id.arch_base)
+            page.view_id.arch_base = content
+
+        new_posts = self.env['blog.post'].search([created_by_migration])
+        for post in new_posts:
+            _logger.info('updating href in blog post {}'.format(post.name))
+            content = self._update_href_for_content(post.content, 'html')
+            post.content = content
+
+    def _update_href_for_content(self, content, to='xml'):
+        et = lxml.html.fromstring(content)
+        a_tags = et.findall('.//a')
+        for a in a_tags:
+            url = a.get('href')
+            if url and (url.startswith('mailto:') or url.startswith('#')):
+                continue
+            if url and self._is_internal_url(url):
+                url = urllib.parse.urlparse(url).path
+                if '%' in url:
+                    url = urllib.parse.unquote(url)
+                if not url.startswith('/'):
+                    url = '/' + url
+                new_url = request.url_map.get(url)
+                if not new_url:
+                    a.drop_tag()
+                    _logger.info('dropped href {}'.format(url))
+                else:
+                    a.set('href', new_url)
+                    _logger.info('converted href from {} to {}'.format(url, new_url))
+        return lxml.html.tostring(et, encoding='unicode', method=to)
+
     def _is_internal_url(self, url):
         url_com = urllib.parse.urlparse(url)
         if not url_com.netloc:
             return True
         website_url_com = urllib.parse.urlparse(self.website_url)
         return url_com.netloc == website_url_com.netloc
+
+    def _create_redirects(self):
+        from_domain = urllib.parse.urlparse(self.website_url).hostname
+        from_website = self.env['website'].search(
+            [('domain', '=', from_domain)], limit=1)
+        if not from_website:
+            values = {
+                'name': from_domain,
+                'domain': from_domain
+            }
+            from_website = self.env['website'].create(values)
+        to_website_url = self._get_website_url(self.to_website_id)
+        for from_url, to_url in request.url_map.items():
+            to_url = urllib.parse.urljoin(to_website_url, to_url)
+            values = {
+                'type': '301',
+                'url_from': from_url,
+                'url_to': to_url,
+                'website_id': from_website.id,
+                'created_by_migration': True
+            }
+            self.env['website.redirect'].create(values)
+
+    @staticmethod
+    def _get_website_url(website):
+        request_url = request.httprequest.url_root
+        request_url_components = urllib.parse.urlparse(request_url)
+        url = '{}://{}'.format(request_url_components.scheme, website.domain)
+        if request_url_components.port:
+            url += ':{}'.format(request_url_components.port)
+        return url
 
     def reset(self):
         self.ensure_one()
@@ -650,77 +588,6 @@ class JoomlaMigration(models.TransientModel):
 
         _logger.info('removing redirects')
         self.env['website.redirect'].search([created_by_migration]).unlink()
-
-    def _create_redirects(self):
-        from_domain = urllib.parse.urlparse(self.website_url).hostname
-        from_website = self.env['website'].search(
-            [('domain', '=', from_domain)], limit=1)
-        if not from_website:
-            values = {
-                'name': from_domain,
-                'domain': from_domain
-            }
-            from_website = self.env['website'].create(values)
-        to_website_url = self._get_website_url(self.to_website_id)
-        rules = self._build_redirect_rules()
-        rules = OrderedDict(rules)
-        for from_url, to_url in rules.items():
-            to_url = urllib.parse.urljoin(to_website_url, to_url)
-            values = {
-                'type': '301',
-                'url_from': from_url,
-                'url_to': to_url,
-                'website_id': from_website.id,
-                'created_by_migration': True
-            }
-            self.env['website.redirect'].create(values)
-
-    def _get_website_url(self, website):
-        request_url = request.httprequest.url_root
-        request_url_components = urllib.parse.urlparse(request_url)
-        url = '{}://{}'.format(request_url_components.scheme, website.domain)
-        if request_url_components.port:
-            url += ':{}'.format(request_url_components.port)
-        return url
-
-    def _build_redirect_rules(self):
-        rules = []
-
-        articles = self.env['joomla.article'].search([])
-        for article in articles:
-            if article.odoo_page_id:
-                from_urls = article.get_urls()
-                to_url = article.odoo_page_id.get_url()
-            elif article.odoo_blog_post_id:
-                from_urls = article.get_urls()
-                to_url = article.odoo_blog_post_id.get_url()
-            else:
-                continue
-            rules.extend([(from_url, to_url) for from_url in from_urls])
-
-        posts = self.env['joomla.easyblog.post'].search([])
-        for post in posts:
-            if post.odoo_blog_post_id:
-                from_url = post.get_url()
-                to_url = post.odoo_blog_post_id.get_url()
-                rules.append((from_url, to_url))
-
-        return rules
-
-    def _find_compatible_odoo_language(self, joomla_language_code):
-        if '-' not in joomla_language_code:
-            return False
-        joomla_language_code = joomla_language_code.replace('-', '_')
-        languages = self.env['res.lang'].search([('active', '=', True)])
-        exact_matches = languages.filtered(
-            lambda r: r.code == joomla_language_code)
-        if exact_matches:
-            return exact_matches[0]
-        nearest_matches = languages.filtered(
-            lambda r: r.code.startswith(joomla_language_code[:2]))
-        if nearest_matches:
-            return nearest_matches[0]
-        return False
 
 
 class UserMapping(models.TransientModel):
