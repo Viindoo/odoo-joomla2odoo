@@ -390,7 +390,7 @@ class JoomlaMigration(models.TransientModel):
         if intro_image_url:
             image = """
                 <p>
-                    <img src="{}" class="center-block"/>
+                    <img src="{}" class="center-block img-responsive"/>
                 </p>
             """.format(intro_image_url)
             content = image + content
@@ -455,6 +455,7 @@ class JoomlaMigration(models.TransientModel):
             if url:
                 new_url = self._migrate_image(url)
                 img.set('src', new_url)
+                img.classes.add('img-responsive')
 
         return lxml.html.tostring(et, encoding='unicode', method=to)
 
