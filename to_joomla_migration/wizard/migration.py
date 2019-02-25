@@ -240,25 +240,10 @@ class JoomlaMigration(models.TransientModel):
     def _migrate_article_to_page(self, article):
         content = article.introtext + article.fulltext
         content = self._convert_content_common(content, 'xml')
-        alias = slugify(article.alias)
-        view_arch = """
-            <t t-name="website.{}">
-                <t t-call="website.layout">
-                    <div id="wrap" class="oe_structure oe_empty">
-                        <div class="container">
-                            {}
-                        </div>
-                    </div>
-                </t>
-            </t>""".format(alias, content)
-        view_values = {
-            'name': article.name,
-            'type': 'qweb',
-            'arch_base': view_arch
-        }
-        view = self.env['ir.ui.view'].create(view_values)
+        intro_image_url = self._migrate_image(article.intro_image_url)
+        view = self._build_page_view(article.name, content, intro_image_url)
         category_path = slugify(article.category_id.path, path=True)
-        page_url = '/' + category_path + '/' + alias
+        page_url = '/' + category_path + '/' + slugify(article.alias)
         page_values = {
             'name': article.name,
             'url': page_url,
@@ -278,6 +263,31 @@ class JoomlaMigration(models.TransientModel):
         if article.sef_url:
             request.url_map[article.sef_url] = page.sef_url
         return page
+
+    def _build_page_view(self, name, content, intro_image_url=None):
+        if intro_image_url:
+            content = """
+                <p>
+                    <img src="{}" class="center-block img-responsive"/>
+                </p>
+            """.format(intro_image_url) + content
+        view_arch = """
+            <t t-name="website.{}">
+                <t t-call="website.layout">
+                    <div id="wrap" class="oe_structure oe_empty">
+                        <div class="container">
+                            {}
+                        </div>
+                    </div>
+                </t>
+            </t>
+        """.format(slugify(name), content)
+        view_values = {
+            'name': name,
+            'type': 'qweb',
+            'arch_base': view_arch
+        }
+        return self.env['ir.ui.view'].create(view_values)
 
     def _migrate_article_to_blog_post(self, article):
         main_content = self._convert_content_common(article.introtext + article.fulltext)
@@ -364,21 +374,20 @@ class JoomlaMigration(models.TransientModel):
         return new_post
 
     @staticmethod
-    def _build_blog_post_content(main_content, intro_image_url=None):
+    def _build_blog_post_content(content, intro_image_url=None):
+        if intro_image_url:
+            content = """
+                <p>
+                    <img src="{}" class="center-block img-responsive"/>
+                </p>
+            """.format(intro_image_url) + content
         content = """
             <section class="s_text_block">
                 <div class="container">
                     {}
                 </div>
             </section>
-        """.format(main_content)
-        if intro_image_url:
-            image = """
-                <p>
-                    <img src="{}" class="center-block img-responsive"/>
-                </p>
-            """.format(intro_image_url)
-            content = image + content
+        """.format(content)
         return content
 
     def _migrate_easyblog_tags(self):
