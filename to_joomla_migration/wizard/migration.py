@@ -290,9 +290,10 @@ class JoomlaMigration(models.TransientModel):
         return self.env['ir.ui.view'].create(view_values)
 
     def _migrate_article_to_blog_post(self, article):
-        main_content = self._convert_content_common(article.introtext + article.fulltext)
+        content = article.introtext + article.fulltext
+        content = self._convert_content_common(content)
         intro_image_url = self._migrate_image(article.intro_image_url)
-        content = self._build_blog_post_content(main_content, intro_image_url)
+        content = self._build_blog_post_content(content, intro_image_url)
         author = article.author_id.odoo_user_id.partner_id
         if not author:
             author = self.env.user.partner_id
@@ -342,9 +343,10 @@ class JoomlaMigration(models.TransientModel):
                          .format(idx, total, post.permalink))
 
     def _migrate_easyblog_post(self, post):
-        main_content = self._convert_content_common(post.intro + post.content)
+        content = post.intro + post.content
+        content = self._convert_content_common(content)
         intro_image_url = self._migrate_image(post.intro_image_url)
-        content = self._build_blog_post_content(main_content, intro_image_url)
+        content = self._build_blog_post_content(content, intro_image_url)
         author = post.author_id.odoo_user_id.partner_id
         meta = post.meta_ids.filtered(lambda r: r.type == 'post')
         if not author:
