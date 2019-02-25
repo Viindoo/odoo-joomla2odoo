@@ -20,6 +20,7 @@ _bootstrap_replacement_rules = {
         (r'(?<!\S)col-sm-(?=([0-9]|10|11|12)(\s|$))', 'col-md'),
         (r'(?<!\S)col-md-(?=([0-9]|10|11|12)(\s|$))', 'col-lg'),
         (r'(?<!\S)col-lg-(?=([0-9]|10|11|12)(\s|$))', 'col-xl'),
+        (r'(?<!\S)img-responsive(\s|$))', 'img-fluid')
     ]
 }
 
