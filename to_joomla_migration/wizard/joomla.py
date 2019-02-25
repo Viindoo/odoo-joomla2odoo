@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import re
 import urllib.parse
 
 import mysql.connector
@@ -383,6 +384,7 @@ class EasyBlogPost(models.TransientModel):
         posts = self.search([])
         posts._compute_language()
         posts._compute_url()
+        posts._convert_embed_video_code()
 
     def _compute_language(self):
         for post in self:
@@ -401,6 +403,34 @@ class EasyBlogPost(models.TransientModel):
             if _is_lang_code(post.language):
                 url = '/' + post.language[:2] + url
             post.sef_url = url
+
+    def _convert_embed_video_code(self):
+        for post in self:
+            content = post.content
+            matches = re.finditer(r'\[embed=videolink\](.*)\[/embed\]', content)
+            code_map = {}
+            for match in matches:
+                code = match.group(1)
+                meta = json.loads(code)
+                video_url = meta.get('video')
+                width, height = meta.get('width'), meta.get('height')
+                url_components = urllib.parse.urlparse(video_url)
+                if not url_components.netloc.endswith('youtube.com'):
+                    continue
+                queries = urllib.parse.parse_qs(url_components.query)
+                video_id = queries.get('v')
+                if not video_id:
+                    continue
+                video_id = video_id[0]
+                new_code = """
+                    <iframe width="{}" height="{}"
+                        src="https://www.youtube.com/embed/{}"
+                        frameborder="0" allowfullscreen>
+                    </iframe>""".format(width, height, video_id)
+                code_map[match.group(0)] = new_code
+            for old_code, new_code in code_map.items():
+                content = content.replace(old_code, new_code)
+            post.content = content
 
 
 class EasyBlogMeta(models.TransientModel):
