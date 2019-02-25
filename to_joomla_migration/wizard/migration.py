@@ -461,17 +461,17 @@ class JoomlaMigration(models.TransientModel):
         for idx, page in enumerate(new_pages, start=1):
             _logger.info('[{}/{}] updating href in page {}'
                          .format(idx, len(new_pages), page.name))
-            content = self._update_href_for_content(page.view_id.arch_base)
+            content = self._update_href_for_content(page.view_id.arch_base, 'xml')
             page.view_id.arch_base = content
 
         new_posts = self.env['blog.post'].search(this_migration)
         for idx, post in enumerate(new_posts, start=1):
             _logger.info('[{}/{}] updating href in blog post {}'
                          .format(idx, len(new_posts), post.name))
-            content = self._update_href_for_content(post.content, 'html')
+            content = self._update_href_for_content(post.content)
             post.content = content
 
-    def _update_href_for_content(self, content, to='xml'):
+    def _update_href_for_content(self, content, to='html'):
         et = lxml.html.fromstring(content)
         a_tags = et.findall('.//a')
         for a in a_tags:
