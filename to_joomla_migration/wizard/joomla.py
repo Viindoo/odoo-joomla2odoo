@@ -196,6 +196,7 @@ class JoomlaArticle(models.TransientModel):
     tag_ids = fields.Many2many('joomla.tag', compute='_compute_tags')
     menu_ids = fields.One2many('joomla.menu', 'article_id')
     sef_url = fields.Char(index=True)
+    intro_image_url = fields.Char(compute='_compute_intro_image_url', store=True)
     odoo_page_id = fields.Many2one('website.page')
     odoo_blog_post_id = fields.Many2one('blog.post')
     odoo_compat_lang_id = fields.Many2one('res.lang')
@@ -208,6 +209,17 @@ class JoomlaArticle(models.TransientModel):
                 categories += cat
                 cat = cat.parent_id
             article.category_ids = categories
+
+    @api.depends('images')
+    def _compute_intro_image_url(self):
+        for article in self:
+            try:
+                url = json.loads(article.images).get('image_intro', False)
+                if url and not url.startswith('/'):
+                    url = '/' + url
+                article.intro_image_url = url
+            except json.JSONDecodeError:
+                pass
 
     def _compute_tags(self):
         for article in self:
@@ -346,6 +358,7 @@ class EasyBlogPost(models.TransientModel):
     meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
     tag_ids = fields.Many2many('joomla.easyblog.tag', compute='_compute_tags')
     sef_url = fields.Char(index=True)
+    intro_image_url = fields.Char(compute='_compute_intro_image_url', store=True)
     odoo_blog_post_id = fields.Many2one('blog.post')
     odoo_compat_lang_id = fields.Many2one('res.lang')
 
@@ -353,6 +366,16 @@ class EasyBlogPost(models.TransientModel):
         for post in self:
             post.tag_ids = self.env['joomla.easyblog.post.tag'].search(
                 [('post_id', '=', post.id)]).mapped('tag_id')
+
+    @api.depends('image')
+    def _compute_intro_image_url(self):
+        for post in self:
+            if not post.image:
+                continue
+            elif post.image.startswith('shared/'):
+                post.intro_image_url = '/images/easyblog_shared/' + post.image[7:]
+            elif post.image.startswith('user:'):
+                post.intro_image_url = '/images/easyblog_images/' + post.image[5:]
 
     @api.model
     def _done(self):

@@ -281,14 +281,7 @@ class JoomlaMigration(models.TransientModel):
 
     def _migrate_article_to_blog_post(self, article):
         main_content = self._convert_content_common(article.introtext + article.fulltext)
-        try:
-            images = json.loads(article.images)
-        except JSONDecodeError:
-            _logger.warning('failed to read images info')
-            intro_image_url = None
-        else:
-            intro_image_url = images.get('image_intro')
-            intro_image_url = self._migrate_image(intro_image_url)
+        intro_image_url = self._migrate_image(article.intro_image_url)
         content = self._build_blog_post_content(main_content, intro_image_url)
         author = article.author_id.odoo_user_id.partner_id
         if not author:
@@ -340,15 +333,7 @@ class JoomlaMigration(models.TransientModel):
 
     def _migrate_easyblog_post(self, post):
         main_content = self._convert_easyblog_content(post.intro + post.content)
-        if not post.image:
-            intro_image_url = None
-        elif post.image.startswith('shared/'):
-            intro_image_url = 'images/easyblog_shared/' + post.image[7:]
-        elif post.image.startswith('user:'):
-            intro_image_url = 'images/easyblog_images/' + post.image[5:]
-        else:
-            intro_image_url = None
-        intro_image_url = self._migrate_image(intro_image_url)
+        intro_image_url = self._migrate_image(post.intro_image_url)
         content = self._build_blog_post_content(main_content, intro_image_url)
         author = post.author_id.odoo_user_id.partner_id
         meta = post.meta_ids.filtered(lambda r: r.type == 'post')
