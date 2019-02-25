@@ -197,7 +197,7 @@ class JoomlaMigration(models.TransientModel):
                     'login': login,
                     'email': joomla_user.email,
                     'active': not joomla_user.block,
-                    'created_by_migration': True,
+                    'migration_id': self.id,
                     'old_website': self.website_url,
                     'old_website_model': 'users',
                     'old_website_record_id': joomla_user.joomla_id,
@@ -267,7 +267,7 @@ class JoomlaMigration(models.TransientModel):
             'website_ids': [(4, self.to_website_id.id)],
             'active': article.state == 0 or article.state == 1,
             'language_id': article.odoo_compat_lang_id.id,
-            'created_by_migration': True,
+            'migration_id': self.id,
             'old_website': self.website_url,
             'old_website_model': 'article',
             'old_website_record_id': article.joomla_id,
@@ -305,7 +305,7 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_description': article.metadesc,
             'tag_ids': [(6, 0, tags.ids)],
             'language_id': article.odoo_compat_lang_id.id,
-            'created_by_migration': True,
+            'migration_id': self.id,
             'old_website': self.website_url,
             'old_website_model': 'article',
             'old_website_record_id': article.joomla_id
@@ -325,7 +325,7 @@ class JoomlaMigration(models.TransientModel):
             if not odoo_tag:
                 values = {
                     'name': tag.name,
-                    'created_by_migration': True
+                    'migration_id': self.id
                 }
                 odoo_tag = self.env['blog.tag'].create(values)
             tag.odoo_blog_tag_id = odoo_tag.id
@@ -367,7 +367,7 @@ class JoomlaMigration(models.TransientModel):
             'website_meta_description': meta.description,
             'tag_ids': [(6, 0, tags.ids)],
             'language_id': post.odoo_compat_lang_id.id,
-            'created_by_migration': True,
+            'migration_id': self.id,
             'old_website': self.website_url,
             'old_website_model': 'easyblog_post',
             'old_website_record_id': post.joomla_id
@@ -437,7 +437,7 @@ class JoomlaMigration(models.TransientModel):
             if not odoo_tag:
                 values = {
                     'name': tag.name,
-                    'created_by_migration': True
+                    'migration_id': self.id
                 }
                 odoo_tag = self.env['blog.tag'].create(values)
             tag.odoo_blog_tag_id = odoo_tag.id
@@ -483,7 +483,7 @@ class JoomlaMigration(models.TransientModel):
             'datas_fname': name,
             'res_model': 'ir.ui.view',
             'public': True,
-            'created_by_migration': True,
+            'migration_id': self.id,
             'website_id': self.to_website_id.id
         }
         attach = self.env['ir.attachment'].create(values)
@@ -491,15 +491,15 @@ class JoomlaMigration(models.TransientModel):
         return new_url
 
     def _update_href(self):
-        created_by_migration = ('created_by_migration', '=', True)
+        this_migration = [('migration_id', '=', self.id)]
 
-        new_pages = self.env['website.page'].search([created_by_migration])
+        new_pages = self.env['website.page'].search(this_migration)
         for page in new_pages:
             _logger.info('updating href in page {}'.format(page.name))
             content = self._update_href_for_content(page.view_id.arch_base)
             page.view_id.arch_base = content
 
-        new_posts = self.env['blog.post'].search([created_by_migration])
+        new_posts = self.env['blog.post'].search(this_migration)
         for post in new_posts:
             _logger.info('updating href in blog post {}'.format(post.name))
             content = self._update_href_for_content(post.content, 'html')
@@ -552,7 +552,7 @@ class JoomlaMigration(models.TransientModel):
                 'url_from': from_url,
                 'url_to': to_url,
                 'website_id': from_website.id,
-                'created_by_migration': True
+                'migration_id': self.id
             }
             self.env['website.redirect'].create(values)
 
@@ -568,7 +568,7 @@ class JoomlaMigration(models.TransientModel):
     def reset(self):
         self.ensure_one()
         self = self.with_context(active_test=False)
-        created_by_migration = ('created_by_migration', '=', True)
+        created_by_migration = ('migration_id', '!=', False)
 
         _logger.info('removing website pages')
         pages = self.env['website.page'].search([created_by_migration])

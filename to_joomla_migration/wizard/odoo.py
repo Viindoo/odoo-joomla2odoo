@@ -6,7 +6,7 @@ from odoo.addons.http_routing.models.ir_http import slugify
 class JoomlaMigrationTrack(models.AbstractModel):
     _name = 'joomla.migration.track'
 
-    created_by_migration = fields.Boolean()
+    migration_id = fields.Integer()
     old_website = fields.Char()
     old_website_model = fields.Char()
     old_website_record_id = fields.Integer()
