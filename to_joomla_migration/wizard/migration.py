@@ -185,6 +185,8 @@ class JoomlaMigration(models.TransientModel):
         total = len(self.user_ids)
         portal_group = self.env.ref('base.group_portal')
         for idx, joomla_user in enumerate(self.user_ids, start=1):
+            _logger.info('[{}/{}] migrating user {}'
+                         .format(idx, total, joomla_user.username))
             odoo_user = user_map.get(joomla_user) or email_map_user.get(joomla_user.email)
             if not odoo_user:
                 login = joomla_user.username
@@ -206,8 +208,6 @@ class JoomlaMigration(models.TransientModel):
                     odoo_user = ResUser.with_context(no_reset_password=True).create(values)
                 else:
                     odoo_user = ResUser.create(values)
-                _logger.info('[{}/{}] created user {}'
-                             .format(idx, total, joomla_user.username))
             joomla_user.odoo_user_id = odoo_user.id
 
     def _migrate_articles(self):
@@ -226,15 +226,15 @@ class JoomlaMigration(models.TransientModel):
 
         total = len(page_articles)
         for idx, article in enumerate(page_articles, start=1):
-            self._migrate_article_to_page(article)
-            _logger.info('[{}/{}] created page {}'
+            _logger.info('[{}/{}] migrating page {}'
                          .format(idx, total, article.alias))
+            self._migrate_article_to_page(article)
 
         total = len(blog_articles)
         for idx, article in enumerate(blog_articles, start=1):
-            self._migrate_article_to_blog_post(article)
-            _logger.info('[{}/{}] created blog post {}'
+            _logger.info('[{}/{}] migrating blog post {}'
                          .format(idx, total, article.alias))
+            self._migrate_article_to_blog_post(article)
 
     def _migrate_article_to_page(self, article):
         content = article.introtext + article.fulltext
@@ -339,9 +339,9 @@ class JoomlaMigration(models.TransientModel):
         posts = self.easyblog_post_ids
         total = len(posts)
         for idx, post in enumerate(posts, start=1):
-            self._migrate_easyblog_post(post)
-            _logger.info('[{}/{}] created blog post {}'
+            _logger.info('[{}/{}] migrating blog post {}'
                          .format(idx, total, post.permalink))
+            self._migrate_easyblog_post(post)
 
     def _migrate_easyblog_post(self, post):
         content = post.intro + post.content
