@@ -170,7 +170,6 @@ class JoomlaMigration(models.TransientModel):
             self._migrate_users()
         if self.include_article:
             _logger.info('migrating articles')
-            self._migrate_article_tags()
             self._migrate_articles()
         if self.include_easyblog:
             _logger.info('migrating easyblog')
@@ -297,6 +296,7 @@ class JoomlaMigration(models.TransientModel):
         author = article.author_id.odoo_user_id.partner_id
         if not author:
             author = self.env.user.partner_id
+        self._migrate_article_tag_to_blog_tag(article)
         tags = article.tag_ids.mapped('odoo_blog_tag_id')
         post_values = {
             'blog_id': self.to_blog_id.id,
@@ -320,19 +320,20 @@ class JoomlaMigration(models.TransientModel):
             request.url_map[article.sef_url] = post.sef_url
         return post
 
-    def _migrate_article_tags(self):
-        odoo_tags = self.env['blog.tag'].search([])
-        odoo_tag_names = {r.name: r for r in odoo_tags}
-        article_tags = self.env['joomla.tag'].search([])
-        for tag in article_tags:
-            odoo_tag = odoo_tag_names.get(tag.name)
-            if not odoo_tag:
+    def _migrate_article_tag_to_blog_tag(self, article):
+        blog_tags = self.env['blog.tag'].search([])
+        blog_tag_names = {r.name: r for r in blog_tags}
+        for tag in article.tag_ids:
+            if tag.odoo_blog_tag_id:
+                continue
+            blog_tag = blog_tag_names.get(tag.name)
+            if not blog_tag:
                 values = {
                     'name': tag.name,
                     'migration_id': self.id
                 }
-                odoo_tag = self.env['blog.tag'].create(values)
-            tag.odoo_blog_tag_id = odoo_tag.id
+                blog_tag = self.env['blog.tag'].create(values)
+            tag.odoo_blog_tag_id = blog_tag.id
 
     def _migrate_easyblog(self):
         posts = self.easyblog_post_ids
