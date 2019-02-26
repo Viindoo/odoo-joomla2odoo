@@ -194,6 +194,7 @@ class JoomlaArticle(models.TransientModel):
     language = fields.Char(joomla_column=True)
     metakey = fields.Text(joomla_column=True)
     metadesc = fields.Text(joomla_column=True)
+    ordering = fields.Integer(joomla_column=True)
     tag_ids = fields.Many2many('joomla.tag', compute='_compute_tags')
     menu_ids = fields.One2many('joomla.menu', 'article_id')
     sef_url = fields.Char(index=True)
