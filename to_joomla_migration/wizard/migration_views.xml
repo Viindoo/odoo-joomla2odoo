@@ -61,8 +61,8 @@
                                 </div>
                                 <field name="user_mapping_ids">
                                     <tree editable="top">
-                                        <field name="joomla_user_id" options="{'no_create_edit': True}"/>
-                                        <field name="odoo_user_id"/>
+                                        <field name="joomla_user_id" options="{'no_create_edit': True}" required="1"/>
+                                        <field name="odoo_user_id" required="1"/>
                                     </tree>
                                 </field>
                             </page>

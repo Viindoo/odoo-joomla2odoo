@@ -591,8 +591,8 @@ class UserMapping(models.TransientModel):
     _description = 'User Migration Mapping'
 
     migration_id = fields.Many2one('joomla.migration', ondelete='cascade')
-    joomla_user_id = fields.Many2one('joomla.user', required=True)
-    odoo_user_id = fields.Many2one('res.users', required=True)
+    joomla_user_id = fields.Many2one('joomla.user')
+    odoo_user_id = fields.Many2one('res.users')
 
 
 class ArticleMapping(models.TransientModel):
