@@ -5,6 +5,7 @@ import logging
 import re
 import urllib.parse
 import urllib.request
+from collections import defaultdict
 from datetime import datetime
 from json import JSONDecodeError
 
@@ -178,20 +179,35 @@ class JoomlaMigration(models.TransientModel):
 
     def _migrate_users(self):
         ResUser = self.env['res.users']
-        odoo_users = ResUser.search([])
-        email_map_user = {user.email: user for user in odoo_users}
-        login_names = {user.login for user in odoo_users}
-        user_map = {r.joomla_user_id: r.odoo_user_id for r in self.user_mapping_ids}
-        total = len(self.user_ids)
+        ResPartner = self.env['res.partner']
+
+        partners = ResPartner.search([])
+        email_partners = defaultdict(list)
+        for partner in partners:
+            if partner.email:
+                email_partners[partner.email].append(partner)
+
+        existing_users = ResUser.search([])
+        existing_login_names = {user.login for user in existing_users}
+        user_mapping = {r.joomla_user_id: r.odoo_user_id for r in self.user_mapping_ids}
         portal_group = self.env.ref('base.group_portal')
+
         for idx, joomla_user in enumerate(self.user_ids, start=1):
             _logger.info('[{}/{}] migrating user {}'
-                         .format(idx, total, joomla_user.username))
-            odoo_user = user_map.get(joomla_user) or email_map_user.get(joomla_user.email)
-            if not odoo_user:
+                         .format(idx, len(self.user_ids), joomla_user.username))
+            existing_partner = False
+            existing_user = user_mapping.get(joomla_user)
+            if not existing_user:
+                partners = email_partners.get(joomla_user.email)
+                if partners and len(partners) == 1:
+                    existing_partner = partners[0]
+            if not existing_user:
                 login = joomla_user.username
-                if login in login_names:
+                if login in existing_login_names:
                     login = joomla_user.email
+                if login in existing_login_names:
+                    _logger.info('ignore')
+                    continue
                 values = {
                     'name': joomla_user.name,
                     'groups_id': [(4, portal_group.id)],
@@ -204,11 +220,20 @@ class JoomlaMigration(models.TransientModel):
                     'old_website_record_id': joomla_user.joomla_id,
                     'website_id': self.to_website_id.id,
                 }
+                if existing_partner:
+                    values.update(partner_id=existing_partner.id,
+                                  created_from_existing_partner=True)
                 if self.no_reset_password:
-                    odoo_user = ResUser.with_context(no_reset_password=True).create(values)
+                    existing_user = ResUser.with_context(no_reset_password=True).create(values)
                 else:
-                    odoo_user = ResUser.create(values)
-            joomla_user.odoo_user_id = odoo_user.id
+                    existing_user = ResUser.create(values)
+                if existing_partner:
+                    _logger.info('created new user from existing partner')
+                else:
+                    _logger.info('created new user')
+            else:
+                _logger.info('found matching user')
+            joomla_user.odoo_user_id = existing_user.id
 
     def _migrate_articles(self):
         articles = self.article_ids
@@ -551,8 +576,11 @@ class JoomlaMigration(models.TransientModel):
         self.env['ir.attachment'].search([created_by_migration]).unlink()
 
         _logger.info('removing users')
-        self.env['res.users'].search([created_by_migration]).unlink()
-        self.env['res.partner'].search([created_by_migration]).unlink()
+        users = self.env['res.users'].search([created_by_migration])
+        partners = users.filtered(
+            lambda r: not r.created_from_existing_partner).mapped('partner_id')
+        users.unlink()
+        partners.unlink()
 
         _logger.info('removing redirects')
         self.env['website.redirect'].search([created_by_migration]).unlink()

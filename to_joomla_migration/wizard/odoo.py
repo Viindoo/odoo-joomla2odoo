@@ -12,9 +12,11 @@ class JoomlaMigrationTrack(models.AbstractModel):
     old_website_record_id = fields.Integer()
 
 
-class Partner(models.Model):
-    _name = 'res.partner'
-    _inherit = ['res.partner', 'joomla.migration.track']
+class User(models.Model):
+    _name = 'res.users'
+    _inherit = ['res.users', 'joomla.migration.track']
+
+    created_from_existing_partner = fields.Boolean()
 
 
 class WebsitePage(models.Model):
