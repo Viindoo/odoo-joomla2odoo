@@ -80,6 +80,7 @@ class JoomlaMigration(models.TransientModel):
 
     def load_data(self):
         self.ensure_one()
+        self = self.with_context(active_test=False)
         old_data = self.env['joomla.migration'].search([]) - self
         old_data.unlink()
 
@@ -129,7 +130,7 @@ class JoomlaMigration(models.TransientModel):
         return joomla_models
 
     def _init_user_mapping(self):
-        odoo_users = self.env['res.users'].with_context(active_test=False).search([])
+        odoo_users = self.env['res.users'].search([])
         email_map_user = {r.email: r for r in odoo_users}
         for joomla_user in self.user_ids:
             odoo_user = email_map_user.get(joomla_user.email)
@@ -152,11 +153,12 @@ class JoomlaMigration(models.TransientModel):
 
     def migrate_data(self):
         self.ensure_one()
+        self = self.with_context(active_test=False)
         _logger.info('start migrating data')
         start = datetime.now()
         request.url_map = {}
-        self.with_context(active_test=False)._migrate_data()
-        self.with_context(active_test=False)._update_href()
+        self._migrate_data()
+        self._update_href()
         if self.redirect:
             self._create_redirects()
         time = datetime.now() - start
