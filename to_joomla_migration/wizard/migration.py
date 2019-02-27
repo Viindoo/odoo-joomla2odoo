@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import base64
-import json
 import logging
 import re
 import urllib.parse
 import urllib.request
 from collections import defaultdict
 from datetime import datetime
-from json import JSONDecodeError
 
 import lxml.etree
 import lxml.html
