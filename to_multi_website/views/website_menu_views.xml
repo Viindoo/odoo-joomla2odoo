@@ -1,0 +1,11 @@
+<odoo>
+	<record id="action_website_menu" model="ir.actions.act_window">
+		<field name="name">Website Menus</field>
+		<field name="res_model">website.menu</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+
+	<menuitem id="menu_website_menu" name="Website Menus"
+		action="action_website_menu"
+		parent="website.menu_website_global_configuration" sequence="16" />
+</odoo>

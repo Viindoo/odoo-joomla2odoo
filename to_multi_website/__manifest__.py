@@ -9,6 +9,7 @@
     'version': '0.1',
     'depends': ['website'],
     'data': [
-        'views/website_views.xml'
+        'views/website_views.xml',
+        'views/website_menu_views.xml'
     ]
 }
