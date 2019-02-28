@@ -28,7 +28,7 @@
                         </group>
                         <group>
                             <field name="db_name"/>
-                            <field name="db_table_prefix" placehold="sf2d0_"/>
+                            <field name="db_table_prefix" placeholder="sf2d0_"/>
                         </group>
                     </group>
                     <group>
