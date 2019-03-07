@@ -179,22 +179,32 @@ class JoomlaMigration(models.TransientModel):
 
     def _migrate_users(self):
         ResUser = self.env['res.users']
+        if self.no_reset_password:
+            ResUser = ResUser.with_context(no_reset_password=True)
+
         ResPartner = self.env['res.partner']
 
         partners = ResPartner.search([])
+
+        
+        partners.read(['email'])
         email_partners = defaultdict(list)
         for partner in partners:
             if partner.email:
                 email_partners[partner.email].append(partner)
 
-        existing_users = ResUser.search([])
+        existing_users = ResUser.search([])        
+        # read for caching to improve performance during later operations
+        existing_users.read(['login'])
         existing_login_names = {user.login for user in existing_users}
         user_mapping = {r.joomla_user_id: r.odoo_user_id for r in self.user_mapping_ids}
         portal_group = self.env.ref('base.group_portal')
 
-        for idx, joomla_user in enumerate(self.user_ids, start=1):
-            _logger.info('[{}/{}] migrating user {}'
-                         .format(idx, len(self.user_ids), joomla_user.username))
+        joomla_users = self.user_ids
+        # read for caching to improve performance during later operations
+        joomla_users.read(['username', 'email', 'name', 'block', 'joomla_id'])
+        for idx, joomla_user in enumerate(joomla_users, start=1):
+            _logger.info('[%s/%s] migrating user %s' % (idx, len(self.user_ids), joomla_user.username))
             existing_partner = False
             existing_user = user_mapping.get(joomla_user)
             if not existing_user:
@@ -223,10 +233,8 @@ class JoomlaMigration(models.TransientModel):
                 if existing_partner:
                     values.update(partner_id=existing_partner.id,
                                   created_from_existing_partner=True)
-                if self.no_reset_password:
-                    existing_user = ResUser.with_context(no_reset_password=True).create(values)
-                else:
-                    existing_user = ResUser.create(values)
+
+                existing_user = ResUser.create(values)
                 if existing_partner:
                     _logger.info('created new user from existing partner')
                 else:
