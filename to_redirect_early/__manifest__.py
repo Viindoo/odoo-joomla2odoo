@@ -10,5 +10,6 @@ redirect url and thus allows including language code in redirect from url""",
     'category': '',
     'version': '0.1',
     'depends': ['website'],
-    'data': []
+    'data': [],
+    'auto_install': True,
 }
