@@ -192,7 +192,7 @@ class JoomlaMigration(models.TransientModel):
             if partner.email:
                 email_partners[partner.email].append(partner)
 
-        existing_users = ResUser.search([])        
+        existing_users = ResUser.search([])
         # read for caching to improve performance during later operations
         existing_users.read(['login'])
         existing_login_names = {user.login for user in existing_users}
