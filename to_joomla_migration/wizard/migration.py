@@ -186,7 +186,6 @@ class JoomlaMigration(models.TransientModel):
 
         partners = ResPartner.search([])
 
-        
         partners.read(['email'])
         email_partners = defaultdict(list)
         for partner in partners:
@@ -513,7 +512,7 @@ class JoomlaMigration(models.TransientModel):
             if url and (url.startswith('mailto:') or url.startswith('#')):
                 continue
             if url and self._is_internal_url(url):
-                url = urllib.parse.urlparse(url).path
+                url = re.sub(r'^https?://[^/]+', '', url)  # convert to relative url
                 if '%' in url:
                     url = urllib.parse.unquote(url)
                 if not url.startswith('/'):
