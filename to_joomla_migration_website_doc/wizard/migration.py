@@ -2,7 +2,6 @@
 import logging
 
 from odoo import api, fields, models, _
-from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
@@ -127,7 +126,7 @@ class JoomlaMigration(models.TransientModel):
         doc_content_values = self._prepare_doc_content_values(article)
         doc_content_values.update(parent_id=doc.id)
         self.env['website.document.content'].create(doc_content_values)
-        request.url_map[article.sef_url] = doc.sef_url
+        self._add_url_map(article.sef_url, doc.sef_url)
         return doc
 
     def _prepare_doc_content_values(self, article):

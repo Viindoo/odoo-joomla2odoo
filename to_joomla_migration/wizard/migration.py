@@ -156,7 +156,6 @@ class JoomlaMigration(models.TransientModel):
         self = self.with_context(active_test=False)
         _logger.info('start migrating data')
         start = datetime.now()
-        request.url_map = {}
         self._migrate_data()
         self._update_href()
         if self.redirect:
@@ -291,8 +290,7 @@ class JoomlaMigration(models.TransientModel):
         }
         page = self.env['website.page'].create(page_values)
         article.odoo_page_id = page.id
-        if article.sef_url:
-            request.url_map[article.sef_url] = page.sef_url
+        self._add_url_map(article.sef_url, page.sef_url)
         return page
 
     def _build_page_view(self, name, content, intro_image_url=None):
@@ -348,8 +346,7 @@ class JoomlaMigration(models.TransientModel):
         }
         post = self.env['blog.post'].create(post_values)
         article.odoo_blog_post_id = post.id
-        if article.sef_url:
-            request.url_map[article.sef_url] = post.sef_url
+        self._add_url_map(article.sef_url, post.sef_url)
         return post
 
     def _migrate_article_tag_to_blog_tag(self, article):
@@ -404,8 +401,8 @@ class JoomlaMigration(models.TransientModel):
         }
         new_post = self.env['blog.post'].create(post_values)
         post.odoo_blog_post_id = new_post.id
-        request.url_map[post.url] = new_post.sef_url
-        request.url_map[post.sef_url] = new_post.sef_url
+        self._add_url_map(post.url, new_post.sef_url, redirect=False)
+        self._add_url_map(post.sef_url, new_post.sef_url)
         return new_post
 
     @staticmethod
@@ -517,11 +514,12 @@ class JoomlaMigration(models.TransientModel):
                     url = urllib.parse.unquote(url)
                 if not url.startswith('/'):
                     url = '/' + url
-                new_url = request.url_map.get(url)
-                if not new_url:
+                url_map = self._get_url_map(url)
+                if not url_map:
                     a.drop_tag()
                     _logger.info('dropped href {}'.format(url))
                 else:
+                    new_url = url_map[1]
                     a.set('href', new_url)
                     _logger.info('converted href from {} to {}'.format(url, new_url))
         return lxml.html.tostring(et, encoding='unicode', method=to)
@@ -544,7 +542,9 @@ class JoomlaMigration(models.TransientModel):
             }
             from_website = self.env['website'].create(values)
         to_website_url = self._get_website_url(self.to_website_id)
-        for from_url, to_url in request.url_map.items():
+        for from_url, to_url, redirect in self._iter_url_map():
+            if not redirect:
+                continue
             to_url = urllib.parse.urljoin(to_website_url, to_url)
             values = {
                 'type': '301',
@@ -563,6 +563,26 @@ class JoomlaMigration(models.TransientModel):
         if request_url_components.port:
             url += ':{}'.format(request_url_components.port)
         return url
+
+    def _add_url_map(self, from_url, to_url, redirect=True):
+        if not request or not from_url or not to_url:
+            return
+        if not hasattr(request, 'url_map'):
+            request.url_map = {}
+        request.url_map[from_url] = (to_url, redirect)
+
+    def _get_url_map(self, from_url):
+        if not request or not hasattr(request, 'url_map'):
+            return None
+        if from_url in request.url_map:
+            return (from_url, *request.url_map.get(from_url))
+        return None
+
+    def _iter_url_map(self):
+        if not request or not hasattr(request, 'url_map'):
+            return
+        for from_url, (to_url, redirect) in request.url_map.items():
+            yield from_url, to_url, redirect
 
     def reset(self):
         self.ensure_one()
