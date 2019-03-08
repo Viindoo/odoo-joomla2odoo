@@ -359,6 +359,7 @@ class EasyBlogPost(models.TransientModel):
     language = fields.Char(joomla_column=True)
     meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
     tag_ids = fields.Many2many('joomla.easyblog.tag', compute='_compute_tags')
+    url = fields.Char(index=True)
     sef_url = fields.Char(index=True)
     intro_image_url = fields.Char(compute='_compute_intro_image_url', store=True)
     odoo_blog_post_id = fields.Many2one('blog.post')
@@ -400,10 +401,12 @@ class EasyBlogPost(models.TransientModel):
 
     def _compute_url(self):
         for post in self:
-            url = '/blog/entry/' + post.permalink
             if _is_lang_code(post.language):
-                url = '/' + post.language[:2] + url
-            post.sef_url = url
+                url = '/{}/blog'.format(post.language[:2])
+            else:
+                url = '/blog'
+            post.url = '{}?view=entry&id={}'.format(url, post.joomla_id)
+            post.sef_url = '{}/entry/{}'.format(url, post.permalink)
 
     def _convert_embed_video_code(self):
         for post in self:

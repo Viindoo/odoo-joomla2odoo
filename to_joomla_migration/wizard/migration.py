@@ -404,8 +404,8 @@ class JoomlaMigration(models.TransientModel):
         }
         new_post = self.env['blog.post'].create(post_values)
         post.odoo_blog_post_id = new_post.id
-        if post.sef_url:
-            request.url_map[post.sef_url] = new_post.sef_url
+        request.url_map[post.url] = new_post.sef_url
+        request.url_map[post.sef_url] = new_post.sef_url
         return new_post
 
     @staticmethod
