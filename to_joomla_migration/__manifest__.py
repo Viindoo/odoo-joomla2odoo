@@ -34,6 +34,8 @@ Python: mysql-connector-python which can be installed on your Odoo server by fir
 Eddition Support
 ================
 
+1. Community Edition
+2. Enterprise Edition
     """,
     'author': "T.V.T Marine Automation (aka TVTMA)",
     'website': 'https://ma.tvtmarine.com',
