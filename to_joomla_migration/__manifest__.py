@@ -51,6 +51,7 @@ Eddition Support
         'views/joomla_views.xml',
         'wizard/migration_views.xml'
     ],
+    'images' : ['static/description/main_screenshot.png'],
     'installable': True,
     'application': True,
     'auto_install': False,
