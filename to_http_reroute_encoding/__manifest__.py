@@ -13,9 +13,17 @@ was not latin1 string. This module fixes the issue by converting the path to lat
 using corresponding wsgi_encoding_dance() before it is passed to wsgi_decoding_dance().
     """,
     'author': "T.V.T Marine Automation (aka TVTMA)",
-    'website': "https://ma.tvtmarine.com",
-    'category': '',
+    'website': 'https://ma.tvtmarine.com',
+    'live_test_url': 'https://v11demo-joomla.erponline.vn',
+    'support': 'support@ma.tvtmarine.com',
+    'category': 'Extra Tools',
     'version': '0.1',
     'depends': ['http_routing'],
-    'data': []
+    'data': [],
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+    'price': 99.0,
+    'currency': 'EUR',
+    'license': 'OPL-1',
 }

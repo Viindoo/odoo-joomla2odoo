@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 
 class WebsiteDocument(models.Model):
     _name = 'website.document'
-    _inherit = ['website.document', 'joomla.migration.track']
+    _inherit = ['website.document', 'abstract.joomla.migration.track']
 
     sef_url = fields.Char(compute='_compute_sef_url')
 
@@ -22,7 +22,7 @@ class WebsiteDocument(models.Model):
 
 class WebsiteDocTag(models.Model):
     _name = 'website.doc.tag'
-    _inherit = ['website.doc.tag', 'joomla.migration.track']
+    _inherit = ['website.doc.tag', 'abstract.joomla.migration.track']
 
 
 class JoomlaTag(models.TransientModel):
@@ -31,8 +31,8 @@ class JoomlaTag(models.TransientModel):
     odoo_website_doc_tag_id = fields.Many2one('website.doc.tag')
 
 
-class JoomlaMigration(models.TransientModel):
-    _inherit = 'joomla.migration'
+class WizardJoomlaMigration(models.TransientModel):
+    _inherit = 'wizard.joomla.migration'
 
     to_docs = fields.Boolean()
 

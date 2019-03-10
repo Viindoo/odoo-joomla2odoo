@@ -6,9 +6,10 @@ import urllib.parse
 import urllib.request
 from collections import defaultdict
 from datetime import datetime
+import ast
 
-import lxml.etree
 import lxml.html
+from odoo.tools import pycompat
 
 from odoo import _, api, fields, models
 from odoo.addons.http_routing.models.ir_http import slugify
@@ -19,9 +20,9 @@ from odoo.tools import html_sanitize
 _logger = logging.getLogger(__name__)
 
 
-class JoomlaMigration(models.TransientModel):
-    _name = 'joomla.migration'
-    _description = 'Joomla Migration'
+class WizardJoomlaMigration(models.TransientModel):
+    _name = 'wizard.joomla.migration'
+    _description = 'Joomla Migration Wizard'
 
     def _default_to_website(self):
         return self.env['website'].search([], limit=1).id
@@ -48,7 +49,7 @@ class JoomlaMigration(models.TransientModel):
     to_website_id = fields.Many2one('website', default=_default_to_website)
     to_blog_id = fields.Many2one('blog.blog', default=_default_to_blog)
 
-    user_ids = fields.One2many('joomla.user', 'migration_id')
+    juser_ids = fields.One2many('joomla.user', 'migration_id', string='Joomla Users')
     category_ids = fields.One2many('joomla.category', 'migration_id')
     article_ids = fields.One2many('joomla.article', 'migration_id')
     easyblog_post_ids = fields.One2many('joomla.easyblog.post', 'migration_id')
@@ -69,8 +70,8 @@ class JoomlaMigration(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         # Restore last setup info
-        values = super(JoomlaMigration, self).default_get(fields_list)
-        last = self.env['joomla.migration'].search([], limit=1, order='id desc')
+        values = super(WizardJoomlaMigration, self).default_get(fields_list)
+        last = self.env['wizard.joomla.migration'].search([], limit=1, order='id desc')
         if last:
             last_values = last.read(['website_url', 'host_address', 'host_port',
                                      'db_user', 'db_password', 'db_name',
@@ -81,7 +82,7 @@ class JoomlaMigration(models.TransientModel):
     def load_data(self):
         self.ensure_one()
         self = self.with_context(active_test=False)
-        old_data = self.env['joomla.migration'].search([]) - self
+        old_data = self.env['wizard.joomla.migration'].search([]) - self
         old_data.unlink()
 
         _logger.info('start loading data')
@@ -97,7 +98,7 @@ class JoomlaMigration(models.TransientModel):
         return {
             'name': 'Joomla Migration',
             'type': 'ir.actions.act_window',
-            'res_model': 'joomla.migration',
+            'res_model': 'wizard.joomla.migration',
             'view_mode': 'form',
             'res_id': self.id,
             'target': 'new',
@@ -132,7 +133,7 @@ class JoomlaMigration(models.TransientModel):
     def _init_user_mapping(self):
         odoo_users = self.env['res.users'].search([])
         email_map_user = {r.email: r for r in odoo_users}
-        for joomla_user in self.user_ids:
+        for joomla_user in self.juser_ids:
             odoo_user = email_map_user.get(joomla_user.email)
             if odoo_user:
                 self.env['joomla.migration.user.mapping'].create({
@@ -144,7 +145,7 @@ class JoomlaMigration(models.TransientModel):
     def _get_migrating_info(self):
         info = 'Found data:\n'
         if self.include_user:
-            info += '- {} users\n'.format(len(self.user_ids))
+            info += '- {} users\n'.format(len(self.juser_ids))
         if self.include_article:
             info += '- {} articles\n'.format(len(self.article_ids))
         if self.include_easyblog:
@@ -153,7 +154,7 @@ class JoomlaMigration(models.TransientModel):
 
     def migrate_data(self):
         self.ensure_one()
-        self = self.with_context(active_test=False)
+        self = self.with_context(active_test=False, migrate_from_joomla=True)
         _logger.info('start migrating data')
         start = datetime.now()
         self._migrate_data()
@@ -178,8 +179,10 @@ class JoomlaMigration(models.TransientModel):
 
     def _migrate_users(self):
         ResUser = self.env['res.users']
+        default_lang_id = self.to_website_id.default_lang_id
         if self.no_reset_password:
             ResUser = ResUser.with_context(no_reset_password=True)
+        ResUser.with_context(old_website=self.website_url, new_website=self.to_website_id.domain)
 
         ResPartner = self.env['res.partner']
 
@@ -198,34 +201,42 @@ class JoomlaMigration(models.TransientModel):
         user_mapping = {r.joomla_user_id: r.odoo_user_id for r in self.user_mapping_ids}
         portal_group = self.env.ref('base.group_portal')
 
-        joomla_users = self.user_ids
+        juser_ids = self.juser_ids
         # read for caching to improve performance during later operations
-        joomla_users.read(['username', 'email', 'name', 'block', 'joomla_id'])
-        for idx, joomla_user in enumerate(joomla_users, start=1):
-            _logger.info('[%s/%s] migrating user %s' % (idx, len(self.user_ids), joomla_user.username))
+        juser_ids.read(['username', 'email', 'name', 'block', 'joomla_id', 'params'])
+        for idx, juser_id in enumerate(juser_ids.with_context(default_lang_for_jitems=default_lang_id), start=1):
+            _logger.info('[%s/%s] migrating user %s from the website %s' % (idx, len(self.juser_ids), juser_id.username, self.website_url))
+            # convert joomla user params to python dict
+            juser_params = ast.literal_eval(pycompat.to_native(juser_id.params))
+            lang_id = juser_id.get_odoo_lang(juser_params.get('language', False))
+            j_timezone = juser_params.get('timezone', '')
+            if j_timezone:
+                j_timezone = j_timezone.replace('\\', '')
             existing_partner = False
-            existing_user = user_mapping.get(joomla_user)
+            existing_user = user_mapping.get(juser_id)
             if not existing_user:
-                partners = email_partners.get(joomla_user.email)
+                partners = email_partners.get(juser_id.email)
                 if partners and len(partners) == 1:
                     existing_partner = partners[0]
             if not existing_user:
-                login = joomla_user.username
+                login = juser_id.username
                 if login in existing_login_names:
-                    login = joomla_user.email
+                    login = juser_id.email
                 if login in existing_login_names:
                     _logger.info('ignore')
                     continue
                 values = {
-                    'name': joomla_user.name,
+                    'name': juser_id.name,
+                    'lang': lang_id.code,
+                    'tz': j_timezone or self.env.user.tz,
                     'groups_id': [(4, portal_group.id)],
                     'login': login,
-                    'email': joomla_user.email,
-                    'active': not joomla_user.block,
+                    'email': juser_id.email,
+                    'active': not juser_id.block,
                     'migration_id': self.id,
                     'old_website': self.website_url,
                     'old_website_model': 'users',
-                    'old_website_record_id': joomla_user.joomla_id,
+                    'old_website_record_id': juser_id.joomla_id,
                     'website_id': self.to_website_id.id,
                 }
                 if existing_partner:
@@ -239,7 +250,7 @@ class JoomlaMigration(models.TransientModel):
                     _logger.info('created new user')
             else:
                 _logger.info('found matching user')
-            joomla_user.odoo_user_id = existing_user.id
+            juser_id.odoo_user_id = existing_user.id
 
     def _migrate_articles(self):
         articles = self.article_ids
@@ -439,7 +450,9 @@ class JoomlaMigration(models.TransientModel):
     def _convert_content_common(self, content, to='html'):
         if not content:
             return ''
+        content = content.replace('lang:php=""', '').replace('lang:php=', '').replace('lang:php', '').replace('xml:lang="css"', '').replace('xml:lang="php"', '').replace('xml:lang="xml"', '').replace('xml:lang="python"', '')
         clean_content = html_sanitize(content)
+
         et = lxml.html.fromstring(clean_content)
 
         # convert image urls
@@ -617,7 +630,7 @@ class UserMapping(models.TransientModel):
     _name = 'joomla.migration.user.mapping'
     _description = 'User Migration Mapping'
 
-    migration_id = fields.Many2one('joomla.migration', ondelete='cascade')
+    migration_id = fields.Many2one('wizard.joomla.migration', ondelete='cascade')
     joomla_user_id = fields.Many2one('joomla.user')
     odoo_user_id = fields.Many2one('res.users')
 
@@ -626,7 +639,7 @@ class ArticleMapping(models.TransientModel):
     _name = 'joomla.migration.article.mapping'
     _description = 'Article Migration Mapping'
 
-    migration_id = fields.Many2one('joomla.migration', ondelete='cascade')
+    migration_id = fields.Many2one('wizard.joomla.migration', ondelete='cascade')
     category_id = fields.Many2one('joomla.category', required=True)
     migrate_to = fields.Selection([('page', 'Page'), ('blog', 'Blog')],
                                   required=True, default='page')

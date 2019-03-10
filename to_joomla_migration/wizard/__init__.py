@@ -1,3 +1,1 @@
-from . import joomla
-from . import migration
-from . import odoo
+from . import wizard_joomla_migration

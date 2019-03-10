@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data noupdate="0">
+		<!-- Email template for new users that are migrated from a Joomla Site -->
+		<record id="user_account_migration_notif" model="mail.template">
+			<field name="name">User Account Migration Notification</field>
+			<field name="model_id" ref="base.model_res_users" />
+			<field name="email_from"><![CDATA["${object.company_id.name|safe}" <${(object.company_id.email or user.email)|safe}>]]></field>
+			<field name="email_to">${object.email|safe}</field>
+			<field name="subject"><![CDATA[Account Migration Notification // ${object.company_id.name}]]></field>
+			<field name="body_html"><![CDATA[
+<div style="padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777">
+    <table cellspacing="0" cellpadding="0" style="width:600px;border-collapse:collapse;background:inherit;color:inherit">
+        <tbody><tr>
+            <td valign="center" width="200" style="padding:10px 10px 10px 5px;font-size: 12px">
+                <img src="/logo.png" style="padding: 0px; margin: 0px; height: auto; width: 80px;" alt="${user.company_id.name}">
+            </td>
+        </tr></tbody>
+    </table>
+</div>
+<div style="padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777">
+<h2>IMPORTANT!</h2>
+<p>Dear ${object.name},</p>
+% set new_website = object.get_new_migrated_website()
+	<p>We are migrating our Joomla based website at <a href="${object.old_website | safe}">${object.old_website | safe}</a> and moving your account to our Odoo based system at <a href="${new_website}">${new_website}</a></p>
+	<p>For more information on what Odoo is, please take a visit to the Odoo's official website https://www.odoo.com</p>
+    <p>
+        Since Odoo uses different password encrypt against Joomla, there is no way for us to keep you staying with your existing password. In order to connect and get access to our new system, you are required to click on the following to reset your password:
+    </p>
+    <div style="text-align: center; margin-top: 16px;">
+         <a href="${object.signup_url}" style="padding: 5px 10px; font-size: 12px; line-height: 18px; color: #FFFFFF; border-color:#875A7B; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius:3px">Reset Password to connect "${object.company_id.name}"</a>
+    </div>
+    <p>We are sorry for any convenient to you and look forward to your kind cooperation and support.</p>
+    <p>Best regards,</p>
+</div>
+<div style="padding:0px;width:600px;margin:auto; margin-top: 10px; background: #fff repeat top /100%;color:#777777">
+    ${user.signature | safe}
+    <p style="font-size: 11px; margin-top: 10px;">
+        <strong>Sent by <a href="${new_website}">${user.company_id.name}</a></strong>
+    </p>
+</div>]]></field>
+			<field name="user_signature" eval="False" />
+		</record>
+	</data>
+</odoo>

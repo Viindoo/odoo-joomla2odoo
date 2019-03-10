@@ -1,0 +1,23 @@
+<odoo>
+	<record id="website_page_form_inherit" model="ir.ui.view">
+		<field name="name">website.page.form.inherit</field>
+		<field name="model">website.page</field>
+		<field name="inherit_id" ref="website.website_pages_form_view" />
+		<field name="arch" type="xml">
+			<field name="date_publish" position="after">
+				<field name="language_id" />
+			</field>
+		</field>
+	</record>
+
+	<record id="website_page_list_inherit" model="ir.ui.view">
+		<field name="name">website.page.list.inherit</field>
+		<field name="model">website.page</field>
+		<field name="inherit_id" ref="website.website_pages_tree_view" />
+		<field name="arch" type="xml">
+			<field name="website_published" position="after">
+				<field name="language_id" />
+			</field>
+		</field>
+	</record>
+</odoo>

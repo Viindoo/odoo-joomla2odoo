@@ -1,23 +1,31 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Website Page Language Restriction",
-    'summary': """Filter website pages by language""",
+    'name': "Website Blog Language Restriction",
+
+    'summary': """
+Restrict Blog Posts from display on unsupported language website""",
+
     'description': """
-Filter website pages by language
-""",
+Restrict Blog Posts from display on unsupported language website
+    """,
+
     'author': "T.V.T Marine Automation (aka TVTMA)",
     'website': 'https://ma.tvtmarine.com',
     'live_test_url': 'https://v11demo-joomla.erponline.vn',
     'support': 'support@ma.tvtmarine.com',
     'category': 'Website',
     'version': '0.1',
-    'depends': ['website_blog'],
+
+    # any module necessary for this one to work correctly
+    'depends': ['website_blog', 'to_website_content_language'],
+
+    # always loaded
     'data': [
-        'views/website_page_views.xml'
+        'views/blog_post_views.xml',
     ],
     'installable': True,
     'application': False,
-    'auto_install': False,
+    'auto_install': True,
     'price': 0.0,
     'currency': 'EUR',
     'license': 'OPL-1',

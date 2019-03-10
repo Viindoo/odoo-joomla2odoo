@@ -1,7 +1,7 @@
 <odoo>
-    <record id="migration_form" model="ir.ui.view">
-        <field name="name">migration.form</field>
-        <field name="model">joomla.migration</field>
+    <record id="wizard_migration_form" model="ir.ui.view">
+        <field name="name">wizard.migration.form</field>
+        <field name="model">wizard.joomla.migration</field>
         <field name="arch" type="xml">
             <form>
                 <header>
@@ -12,8 +12,7 @@
                             states="setup" confirm="Do you want to remove all migrated data?"/>
                     <button string="Continue" name="migrate_data" type="object"
                             class="oe_highlight" states="migrating"
-                            confirm="This may take a long time depend on how much data you need to migrate.
-                        Please backup your database before doing this. Are you sure?"/>
+                            confirm="This may take a a few minutes to several hours, depending on the amound of data to migrate. Please backup your Odoo database before doing this. Are you sure to proceed?"/>
                 </header>
                 <div states="setup">
                     <h3>
@@ -89,8 +88,8 @@
     </record>
 
     <record id="open_migration_view" model="ir.actions.act_window">
-        <field name="name">Joomla Migration</field>
-        <field name="res_model">joomla.migration</field>
+        <field name="name">Joomla Migration Wizard</field>
+        <field name="res_model">wizard.joomla.migration</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

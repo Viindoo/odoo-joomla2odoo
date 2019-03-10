@@ -1,7 +1,7 @@
 <odoo>
     <record id="migration_form_inherit" model="ir.ui.view">
-        <field name="name">migration.form.inherit</field>
-        <field name="model">joomla.migration</field>
+        <field name="name">wizard.migration.form.inherit</field>
+        <field name="model">wizard.joomla.migration</field>
         <field name="inherit_id" ref="to_joomla_migration.migration_form"/>
         <field name="arch" type="xml">
             <field name="article_mapping_ids" position="before">
