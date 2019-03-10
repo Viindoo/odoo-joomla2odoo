@@ -251,6 +251,8 @@ class WizardJoomlaMigration(models.TransientModel):
             else:
                 _logger.info('found matching user')
             juser_id.odoo_user_id = existing_user.id
+            # commit as finished, because we send reset password email upon each user creation
+            self.env.cr.commit()
 
     def _migrate_articles(self):
         articles = self.article_ids
