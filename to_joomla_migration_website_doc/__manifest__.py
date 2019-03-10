@@ -11,9 +11,9 @@ The migration Scope
 
 1. Joomla Users -> Odoo Users
 2. Joomla Articles (aka com_content) -> Odoo Website Pages
-3. Joomla EasyBlog -> Odoo Blog
-4. Joomla Articles -> `Website Documents 
-(https://apps.odoo.com/apps/modules/11.0/to_website_docs/`_.
+3. Joomla Articles -> Website Documents https://apps.odoo.com/apps/modules/11.0/to_website_docs/
+4. Joomla EasyBlog -> Odoo Blog
+   
 
 Before migration, the administrator can
 
@@ -52,6 +52,7 @@ Eddition Support
     'data': [
         'wizard/migration_views.xml'
     ],
+'images' : ['static/description/main_screenshot.png'],
     'installable': True,
     'application': False,
     'auto_install': True,

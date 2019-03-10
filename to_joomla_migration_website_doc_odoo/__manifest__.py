@@ -7,17 +7,17 @@
     'website': 'https://ma.tvtmarine.com',
     'live_test_url': 'https://v11demo-joomla.erponline.vn',
     'support': 'support@ma.tvtmarine.com',
-    'category': 'Extra Tools',
+    'category': 'Hidden',
     'version': '0.1',
     'depends': [
         'to_joomla_migration_website_doc',
         'to_website_docs_odoo'
     ],
     'data': [],
-    'installable': True,
+    'installable': False,
     'application': False,
-    'auto_install': True,
-    'price': 0.0,
+    'auto_install': False,
+    'price': 99.0,
     'currency': 'EUR',
     'license': 'OPL-1',
 }
