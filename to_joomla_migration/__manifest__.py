@@ -19,6 +19,10 @@ Before migration, the administrator can
 1. Enable/Disable Odoo's Invitation Emails during users migration. A special email template is added to allow the adminsitrator to prepare a message to send to the migrated users
 2. Map Joomla Article Categories with either Website Pages or Website Blog
 
+Old URLs redirect
+-----------------
+During migration, this application creates a map of old URLs (Joomla based URLs) to new Odoo based URLs and store in the Redirect model. Odoo will then know how to do redirect for you.  
+
 Joomla Database Supported
 -------------------------
 1. MySQL
