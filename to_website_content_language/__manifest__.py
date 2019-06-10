@@ -11,7 +11,7 @@ Filter website pages by language
     'support': 'support@ma.tvtmarine.com',
     'category': 'Website',
     'version': '0.1',
-    'depends': ['website_blog'],
+    'depends': ['website'],
     'data': [
         'views/website_page_views.xml'
     ],
