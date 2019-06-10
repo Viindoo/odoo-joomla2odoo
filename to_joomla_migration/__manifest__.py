@@ -50,7 +50,6 @@ Eddition Support
     'depends': [
         'auth_signup',
         'to_migration_track_website_blog',
-        'to_multi_website',
     ],
     'data': [
         'data/mail_template_data.xml',
