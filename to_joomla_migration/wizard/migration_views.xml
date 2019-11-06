@@ -53,7 +53,7 @@
                             	<group>
                             		<field name="no_reset_password"/>
                             	</group>
-                                <div class="alert alert-info" style="margin: 3px 0">
+                                <div role="alert" class="alert alert-info" style="margin: 3px 0">
                                     On migrating, the joomla user that matches with a existing odoo user will be ignore.
                                     Two users are assumed to be matching if they have same email address. The following list
                                     already has been populated with some matching couples found automatically, you can edit it before continue.
