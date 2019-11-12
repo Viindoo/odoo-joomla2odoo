@@ -1,18 +1,19 @@
 <odoo>
-    <record id="wizard_migration_form" model="ir.ui.view">
-        <field name="name">wizard.migration.form</field>
-        <field name="model">wizard.joomla.migration</field>
+    <record id="migration_form" model="ir.ui.view">
+        <field name="name">migration.form</field>
+        <field name="model">joomla.migration</field>
         <field name="arch" type="xml">
             <form>
                 <header>
                     <field name="state" widget="statusbar"/>
-                    <button string="Start" name="load_data" type="object"
+                    <button string="Continue" name="load_data" type="object"
                             class="oe_highlight" states="setup"/>
                     <button string="Reset" name="reset" type="object"
                             states="setup" confirm="Do you want to remove all migrated data?"/>
+                    <button string="Back" name="back" type="object" states="migrating"/>
                     <button string="Continue" name="migrate_data" type="object"
                             class="oe_highlight" states="migrating"
-                            confirm="This may take a a few minutes to several hours, depending on the amound of data to migrate. Please backup your Odoo database before doing this. Are you sure to proceed?"/>
+                            confirm="This may take a a few minutes to several hours, depending on the amount of data to migrate. Please backup your Odoo database before doing this. Are you sure to proceed?"/>
                 </header>
                 <div states="setup">
                     <h3>
@@ -35,19 +36,21 @@
                             <field name="include_user" string="Users"/>
                             <field name="include_article" string="Articles"/>
                             <field name="include_easyblog" string="EasyBlog"/>
+                            <field name="include_easydiscuss" string="EasyDiscuss"/>
                             <field name="redirect" string="Create Redirects"/>
                         </group>
                         <group string="Content Destination">
                             <field name="to_website_id" string="Website"/>
                             <field name="to_blog_id" string="Blog"/>
+                            <field name="to_forum_id" string="Forum"/>
                         </group>
                     </group>
                 </div>
                 <div states="migrating">
-                    <div class="alert alert-info">
-                        <field name="migrating_info" readonly="1"/>
+                    <div role="alert" class="alert alert-info">
+                        <pre class="mb-0"><field name="migrating_info" readonly="1"/></pre>
                     </div>
-                    <group string="Mapping">
+                    <group string="Map">
                         <notebook colspan="2">
                             <page string="Users" attrs="{'invisible': [('include_user', '=', False)]}">
                             	<group>
@@ -58,7 +61,7 @@
                                     Two users are assumed to be matching if they have same email address. The following list
                                     already has been populated with some matching couples found automatically, you can edit it before continue.
                                 </div>
-                                <field name="user_mapping_ids">
+                                <field name="user_map_ids">
                                     <tree editable="top">
                                         <field name="joomla_user_id" options="{'no_create_edit': True}" required="1"/>
                                         <field name="odoo_user_id" required="1"/>
@@ -66,11 +69,11 @@
                                 </field>
                             </page>
                             <page string="Articles" attrs="{'invisible': [('include_article', '=', False)]}">
-                                <div class="alert alert-info" style="margin: 3px 0">
+                                <div role='alert' class="alert alert-info" style="margin: 3px 0">
                                     By default, no joomla articles will be migrated. Please specify the articles
                                     that you want to migrate by their category in here.
                                 </div>
-                                <field name="article_mapping_ids">
+                                <field name="article_map_ids">
                                     <tree editable="bottom">
                                         <field name="category_id" domain="[('extension', 'in', ['system', 'com_content'])]"
                                                options="{'no_create_edit': True}"/>
@@ -88,8 +91,8 @@
     </record>
 
     <record id="open_migration_view" model="ir.actions.act_window">
-        <field name="name">Joomla Migration Wizard</field>
-        <field name="res_model">wizard.joomla.migration</field>
+        <field name="name">Joomla Migration</field>
+        <field name="res_model">joomla.migration</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

@@ -1,1 +1,1 @@
-from . import migration
+from . import joomla_migration

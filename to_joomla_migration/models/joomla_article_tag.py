@@ -4,7 +4,7 @@ from odoo import fields, models
 class JoomlaArticleTag(models.TransientModel):
     _name = 'joomla.article.tag'
     _description = 'Joomla Article Tag'
-    _inherit = 'abstract.j.model'
+    _inherit = 'abstract.joomla.model'
     _joomla_table = 'contentitem_tag_map'
 
     joomla_id = False

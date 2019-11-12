@@ -4,7 +4,7 @@ from odoo import fields, models
 class EasyBlogMeta(models.TransientModel):
     _name = 'joomla.easyblog.meta'
     _description = 'EasyBlog Meta'
-    _inherit = 'abstract.j.model'
+    _inherit = 'abstract.joomla.model'
     _joomla_table = 'easyblog_meta'
 
     type = fields.Char(joomla_column=True)

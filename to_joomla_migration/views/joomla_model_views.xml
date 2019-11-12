@@ -21,6 +21,8 @@
                     <field name="username" readonly="1"/>
                     <field name="email" readonly="1"/>
                 </group>
+                <footer>
+                </footer>
             </form>
         </field>
     </record>
@@ -30,7 +32,7 @@
         <field name="model">joomla.category</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="name"/>
+                <field name="display_name"/>
                 <field name="parent_id"/>
             </tree>
         </field>
@@ -45,6 +47,8 @@
                     <field name="name" readonly="1"/>
                     <field name="parent_id" readonly="1"/>
                 </group>
+                <footer>
+                </footer>
             </form>
         </field>
     </record>

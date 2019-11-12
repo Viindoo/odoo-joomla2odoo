@@ -1,15 +1,17 @@
 import json
+import logging
 import re
 import urllib.parse
 
 from odoo import api, fields, models
-from .abstract_j_model import _is_lang_code
+
+_logger = logging.getLogger(__name__)
 
 
 class EasyBlogPost(models.TransientModel):
     _name = 'joomla.easyblog.post'
+    _inherit = 'abstract.joomla.content'
     _description = 'EasyBlog Post'
-    _inherit = 'abstract.j.model'
     _joomla_table = 'easyblog_post'
 
     name = fields.Char(joomla_column='title')
@@ -22,19 +24,19 @@ class EasyBlogPost(models.TransientModel):
     published = fields.Integer(joomla_column=True)
     publish_up = fields.Datetime(joomla_column=True)
     state = fields.Integer(joomla_column=True)
-    language = fields.Char(joomla_column=True)
+    language = fields.Char(joomla_column=True, string='Language Code')
     meta_ids = fields.One2many('joomla.easyblog.meta', 'content_id')
     tag_ids = fields.Many2many('joomla.easyblog.tag', compute='_compute_tags')
     url = fields.Char(index=True)
     sef_url = fields.Char(index=True)
     intro_image_url = fields.Char(compute='_compute_intro_image_url', store=True)
-    odoo_blog_post_id = fields.Many2one('blog.post')
-    odoo_compat_lang_id = fields.Many2one('res.lang')
+    blog_post_id = fields.Many2one('blog.post')
+    language_id = fields.Many2one('res.lang')
 
     def _compute_tags(self):
+        post_tag = self.env['joomla.easyblog.post.tag'].search([('post_id', 'in', self.ids)])
         for post in self:
-            post.tag_ids = self.env['joomla.easyblog.post.tag'].search(
-                [('post_id', '=', post.id)]).mapped('tag_id')
+            post.tag_ids = post_tag.filtered(lambda pt: pt.post_id == post).mapped('tag_id')
 
     @api.depends('image')
     def _compute_intro_image_url(self):
@@ -47,8 +49,8 @@ class EasyBlogPost(models.TransientModel):
                 post.intro_image_url = '/images/easyblog_images/' + post.image[5:]
 
     @api.model
-    def _done(self):
-        super(EasyBlogPost, self)._done()
+    def _post_load_data(self):
+        super(EasyBlogPost, self)._post_load_data()
         posts = self.search([])
         posts._compute_language()
         posts._compute_url()
@@ -56,18 +58,15 @@ class EasyBlogPost(models.TransientModel):
 
     def _compute_language(self):
         for post in self:
-            if not _is_lang_code(post.language):
-                menu = self.env['joomla.menu'].search(
-                    [('easyblog', '=', True)], limit=1)
-                if menu and _is_lang_code(menu.language):
+            if not self._is_lang_code(post.language):
+                menu = self.env['joomla.menu'].search([('easyblog', '=', True)], limit=1)
+                if menu and self._is_lang_code(menu.language):
                     post.language = menu.language
-            compat_lang = post.get_odoo_lang(post.language)
-            if compat_lang:
-                post.odoo_compat_lang_id = compat_lang.id
+            post.language_id = self._get_lang_from_code(post.language)
 
     def _compute_url(self):
         for post in self:
-            if _is_lang_code(post.language):
+            if self._is_lang_code(post.language):
                 url = '/{}/blog'.format(post.language[:2])
             else:
                 url = '/blog'
@@ -102,3 +101,41 @@ class EasyBlogPost(models.TransientModel):
                 content = content.replace(old_code, new_code)
             post.content = content
 
+    def _prepare_blog_post_values(self):
+        self.ensure_one()
+        values = self._prepare_track_values()
+        author = self.author_id.odoo_user_id.partner_id or self._get_default_partner()
+        content = self._prepare_blog_post_content(self.intro + self.content, self.intro_image_url)
+        meta = self.meta_ids.filtered(lambda r: r.type == 'post')
+        tags = self.tag_ids.mapped('blog_tag_id')
+        values.update(
+            name=self.name,
+            author_id=author.id,
+            content=content,
+            tag_ids=[(6, 0, tags.ids)],
+            post_date=self.publish_up or self.created,
+            active=self.state == 0,
+            website_published=self.published == 1,
+            website_meta_keywords=meta.keywords,
+            website_meta_description=meta.description,
+            language_id=self.language_id.id,
+            blog_id=self.migration_id.to_blog_id.id
+        )
+        return values
+
+    def _migrate_to_blog_post(self):
+        self.ensure_one()
+        values = self._prepare_blog_post_values()
+        self.blog_post_id = self.env['blog.post'].create(values)
+        self._add_url_map(self.url, self.blog_post_id.sef_url, redirect=False)
+        self._add_url_map(self.sef_url, self.blog_post_id.sef_url)
+
+    def migrate_to_blog_post(self):
+        migrated_data_map = self.env['blog.post'].get_migrated_data_map()
+        for idx, post in enumerate(self, start=1):
+            _logger.info('[{}/{}] migrating easyblog post {}'.format(idx, len(self), post.permalink))
+            if post.joomla_id in migrated_data_map:
+                _logger.info('ignore, already migrated')
+                post.blog_post_id = migrated_data_map[post.joomla_id]
+            else:
+                post._migrate_to_blog_post()

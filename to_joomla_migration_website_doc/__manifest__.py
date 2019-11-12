@@ -54,9 +54,9 @@ Eddition Support
         'to_website_docs_odoo_data'
     ],
     'data': [
-        'wizard/migration_views.xml'
+        'wizard/joomla_migration_views.xml'
     ],
-'images' : ['static/description/main_screenshot.png'],
+    'images': ['static/description/main_screenshot.png'],
     'installable': True,
     'application': False,
     'auto_install': True,

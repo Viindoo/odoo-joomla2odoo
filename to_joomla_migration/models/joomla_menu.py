@@ -6,7 +6,7 @@ from odoo import api, fields, models
 class JoomlaMenu(models.TransientModel):
     _name = 'joomla.menu'
     _description = 'Joomla Menu'
-    _inherit = 'abstract.j.model'
+    _inherit = 'abstract.joomla.model'
     _joomla_table = 'menu'
 
     parent_id = fields.Many2one('joomla.menu', joomla_column=True)

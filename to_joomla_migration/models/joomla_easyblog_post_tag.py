@@ -4,7 +4,7 @@ from odoo import fields, models
 class EasyBlogPostTag(models.TransientModel):
     _name = 'joomla.easyblog.post.tag'
     _description = 'EasyBlog Post Tag'
-    _inherit = 'abstract.j.model'
+    _inherit = 'abstract.joomla.model'
     _joomla_table = 'easyblog_post_tag'
 
     joomla_id = False

@@ -50,11 +50,12 @@ Eddition Support
     'depends': [
         'auth_signup',
         'to_migration_track_website_blog',
+        'to_migration_track_website_forum'
     ],
     'data': [
         'data/mail_template_data.xml',
-        'views/joomla_views.xml',
-        'wizard/migration_views.xml'
+        'views/joomla_model_views.xml',
+        'wizard/joomla_migration_views.xml'
     ],
     'images' : ['static/description/main_screenshot.png'],
     'installable': True,

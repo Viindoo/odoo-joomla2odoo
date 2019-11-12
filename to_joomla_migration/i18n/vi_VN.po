@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * to_joomla_migration
+#	* to_joomla_migration
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 11.0\n"
+"Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-10 10:40+0000\n"
-"PO-Revision-Date: 2019-03-10 10:40+0000\n"
+"POT-Creation-Date: 2019-11-13 09:42+0000\n"
+"PO-Revision-Date: 2019-11-13 09:42+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,8 +17,7 @@ msgstr ""
 
 #. module: to_joomla_migration
 #: model:mail.template,body_html:to_joomla_migration.user_account_migration_notif
-msgid ""
-"\n"
+msgid "\n"
 "<div style=\"padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777\">\n"
 "    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
 "        <tbody><tr>\n"
@@ -32,8 +31,8 @@ msgid ""
 "<h2>IMPORTANT!</h2>\n"
 "<p>Dear ${object.name},</p>\n"
 "% set new_website = object.get_new_migrated_website()\n"
-"\t<p>We are migrating our Joomla based website at <a href=\"${object.old_website | safe}\">${object.old_website | safe}</a> and moving your account to our Odoo based system at <a href=\"${new_website}\">${new_website}</a></p>\n"
-"\t<p>For more information on what Odoo is, please take a visit to the Odoo's official website https://www.odoo.com</p>\n"
+"	<p>We are migrating our Joomla based website at <a href=\"${object.old_website | safe}\">${object.old_website | safe}</a> and moving your account to our Odoo based system at <a href=\"${new_website}\">${new_website}</a></p>\n"
+"	<p>For more information on what Odoo is, please take a visit to the Odoo's official website https://www.odoo.com</p>\n"
 "    <p>\n"
 "        Since Odoo uses different password encrypt against Joomla, there is no way for us to keep you staying with your existing password. In order to connect and get access to our new system, you are required to click on the following to reset your password:\n"
 "    </p>\n"
@@ -49,8 +48,7 @@ msgid ""
 "        <strong>Sent by <a href=\"${new_website}\">${user.company_id.name}</a></strong>\n"
 "    </p>\n"
 "</div>"
-msgstr ""
-"\n"
+msgstr "\n"
 "<div style=\"padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777\">\n"
 "    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
 "        <tbody><tr>\n"
@@ -64,8 +62,8 @@ msgstr ""
 "<h2>IMPORTANT!</h2>\n"
 "<p>Dear ${object.name},</p>\n"
 "% set new_website = object.get_new_migrated_website()\n"
-"\t<p>Chúng tôi đang chuyển đổi hệ thống <a href=\"${object.old_website | safe}\">${object.old_website | safe}</a> nền tảng Joomla sang hệ thống <a href=\"${new_website}\">${new_website}</a> nền tảng Odoo.</p>\n"
-"\t<p>Để biết thêm thông tin về Odoo, vui lòng truy cập website chính thức của Odoo tại https://www.odoo.com</p>\n"
+"	<p>Chúng tôi đang chuyển đổi hệ thống <a href=\"${object.old_website | safe}\">${object.old_website | safe}</a> nền tảng Joomla sang hệ thống <a href=\"${new_website}\">${new_website}</a> nền tảng Odoo.</p>\n"
+"	<p>Để biết thêm thông tin về Odoo, vui lòng truy cập website chính thức của Odoo tại https://www.odoo.com</p>\n"
 "    <p>\n"
 "        Do Odoo sử dụng cơ chế mã hoá mật khẩu khác với Joomla nên chúng tôi không có cách nào giữ nguyên mật khẩu cho bạn như ở hệ thống cũ. Vì vậy, để có thể truy cập tài khoản của bạn ở hệ thống mới của chúng tôi, bạn cần phải đặt lại mật khẩu bằng cách bấm vào link dưới đây:\n"
 "    </p>\n"
@@ -83,200 +81,293 @@ msgstr ""
 "</div>"
 
 #. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_abstract_joomla_content
+msgid "Abstract Joomla Content"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_abstract_joomla_migration_track
+msgid "Abstract Joomla Migration Track"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_abstract_joomla_model
+msgid "Abstract Joomla Model"
+msgstr ""
+
+#. module: to_joomla_migration
 #: model:mail.template,subject:to_joomla_migration.user_account_migration_notif
 msgid "Account Migration Notification // ${object.company_id.name}"
 msgstr "Thông báo Di chuyển Tài khoản // ${object.company_id.name}"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_alias
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_alias
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__alias
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__alias
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__alias
 msgid "Alias"
 msgstr "Bí danh"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_article_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_article_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_article_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__answered
+msgid "Answered"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__article_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__article_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__article_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__article_ids
 msgid "Article"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_article_mapping_ids
-msgid "Article Mapping"
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__article_map_ids
+msgid "Article Map"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model,name:to_joomla_migration.model_joomla_migration_article_mapping
-msgid "Article Migration Mapping"
+#: model:ir.model,name:to_joomla_migration.model_joomla_migration_article_map
+msgid "Article Migration Map"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Articles"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_author_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_author_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__articles_count
+msgid "Articles Count"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_ir_attachment
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__attachment_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__attachment_ids
+msgid "Attachment"
+msgstr "Đính kèm"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__author_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__author_id
 msgid "Author"
 msgstr "Tác giả"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_block
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+msgid "Back"
+msgstr "Quay lại"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__block
 msgid "Block"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
-#: selection:joomla.migration.article.mapping,migrate_to:0
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+#: selection:joomla.migration.article.map,migrate_to:0
 msgid "Blog"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
-msgid ""
-"By default, no joomla articles will be migrated. Please specify the articles\n"
+#: model:ir.model,name:to_joomla_migration.model_blog_post
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__blog_post_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__blog_post_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__blog_post_ids
+msgid "Blog Post"
+msgstr "Bài Blog"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__blog_tag_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__blog_tag_id
+msgid "Blog Tag"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+msgid "By default, no joomla articles will be migrated. Please specify the articles\n"
 "                                    that you want to migrate by their category in here."
 msgstr ""
 
 #. module: to_joomla_migration
-#: code:addons/to_joomla_migration/models/res_users.py:51
+#: code:addons/to_joomla_migration/models/res_users.py:47
 #, python-format
 msgid "Cannot send email: user %s has no email address."
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_category_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_category_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_category_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_category_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_category_ids
-msgid "Category"
-msgstr "Nhóm"
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__category_ids
+msgid "Categories"
+msgstr "Chuyên mục"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_content_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_content
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__category_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__category_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__category_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__category_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__category_id
+msgid "Category"
+msgstr "Chuyên mục"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__comment
+msgid "Comment"
+msgstr "Bình luận"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__content_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__content
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__content
 msgid "Content"
 msgstr "Nội dung"
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Content Destination"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__content_type
+msgid "Content Type"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Continue"
 msgstr ""
 
 #. module: to_joomla_migration
-#: code:addons/to_joomla_migration/models/abstract_j_model.py:50
-#, python-format
-msgid ""
-"Could not find an appropriate langage for the record '%s' of the model '%s'."
-msgstr ""
-
-#. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Create Redirects"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_created
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_created
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__created
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__created
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__created
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__created
 msgid "Created"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_res_users_created_from_existing_partner
+#: model:ir.model.fields,field_description:to_joomla_migration.field_res_users__created_from_existing_partner
 msgid "Created From Existing Partner"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_create_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__create_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__create_uid
 msgid "Created by"
 msgstr "Được tạo bởi"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_create_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__create_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__create_date
 msgid "Created on"
 msgstr "Được tạo vào"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_db_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__db_name
 msgid "Db Name"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_db_password
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__db_password
 msgid "Db Password"
-msgstr ""
+msgstr "Mật khẩu DB"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_db_table_prefix
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__db_table_prefix
 msgid "Db Table Prefix"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_db_user
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__db_user
 msgid "Db User"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_description
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__description
 msgid "Description"
-msgstr "Mô tả"
+msgstr "Miêu tả"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_j_model_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_display_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_content__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_model__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__display_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__display_name
 msgid "Display Name"
 msgstr "Tên hiển thị"
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Do you want to remove all migrated data?"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__download_url
+msgid "Download Url"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "EasyBlog"
 msgstr ""
 
@@ -301,120 +392,247 @@ msgid "EasyBlog Tag"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_easyblog
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+msgid "EasyDiscuss"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_joomla_easydiscuss_attachment
+msgid "EasyDiscuss Attachment"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_joomla_easydiscuss_category
+msgid "EasyDiscuss Category"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_joomla_easydiscuss_comment
+msgid "EasyDiscuss Comment"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_joomla_easydiscuss_post
+msgid "EasyDiscuss Post"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_joomla_easydiscuss_post_tag
+msgid "EasyDiscuss Post Tag"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_joomla_easydiscuss_tag
+msgid "EasyDiscuss Tag"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_joomla_easydiscuss_vote
+msgid "EasyDiscuss Vote"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__easyblog
 msgid "Easyblog"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_easyblog_post_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__easyblog_post_ids
 msgid "Easyblog Post"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_email
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__easyblog_tag_ids
+msgid "Easyblog Tag"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__easydicuss_comment_ids
+msgid "Easydicuss Comment"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__easydiscuss_attachment_ids
+msgid "Easydiscuss Attachment"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__easydiscuss_post_ids
+msgid "Easydiscuss Post"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__easydiscuss_tag_ids
+msgid "Easydiscuss Tag"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__easydiscuss_vote_ids
+msgid "Easydiscuss Vote"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__email
 msgid "Email"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_extension
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__extension
 msgid "Extension"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_fulltext
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+msgid "Forum"
+msgstr "Diễn đàn"
+
+#. module: to_joomla_migration
+#: model:ir.model,name:to_joomla_migration.model_forum_post
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__forum_post_id
+msgid "Forum Post"
+msgstr "Bài viết"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__forum_post_comment_id
+msgid "Forum Post Comment"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__forum_post_vote_id
+msgid "Forum Post Vote"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__forum_tag_id
+msgid "Forum Tag"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__from_url
+msgid "From Url"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__fulltext
 msgid "Fulltext"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_host_address
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__hits
+msgid "Hits"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__host_address
 msgid "Host Address"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_host_port
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__host_port
 msgid "Host Port"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_j_model_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_content__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_model__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__id
 msgid "ID"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,help:to_joomla_migration.field_wizard_joomla_migration_no_reset_password
+#: model:ir.model.fields,help:to_joomla_migration.field_joomla_migration__no_reset_password
 msgid "If checked, no reset password request will be raised"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_image
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__image
 msgid "Image"
 msgstr "Hình ảnh"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_images
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__images
 msgid "Images"
 msgstr "Hình ảnh"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_include_article
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__include_article
 msgid "Include Article"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_include_easyblog
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__include_easyblog
 msgid "Include Easyblog"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_include_user
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__include_easydiscuss
+msgid "Include Easydiscuss"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__include_user
 msgid "Include User"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_intro
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__intro
 msgid "Intro"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_intro_image_url
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_intro_image_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__intro_image_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__intro_image_url
 msgid "Intro Image Url"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_introtext
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__introtext
 msgid "Introtext"
 msgstr ""
 
 #. module: to_joomla_migration
-#: code:addons/to_joomla_migration/wizard/wizard_joomla_migration.py:66
+#: code:addons/to_joomla_migration/wizard/joomla_migration.py:46
 #, python-format
 msgid "Invalid website URL!. Website URL should be like http[s]://your.domain"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_j_model_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_joomla_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_content__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_model__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__joomla_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__joomla_id
 msgid "Joomla"
 msgstr ""
 
@@ -434,7 +652,7 @@ msgid "Joomla Category"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Joomla Database Connection"
 msgstr ""
 
@@ -444,19 +662,15 @@ msgid "Joomla Menu"
 msgstr ""
 
 #. module: to_joomla_migration
+#: model:ir.actions.act_window,name:to_joomla_migration.open_migration_view
+#: model:ir.model,name:to_joomla_migration.model_joomla_migration
 #: model:ir.ui.menu,name:to_joomla_migration.menu_joomla_migration
 msgid "Joomla Migration"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.actions.act_window,name:to_joomla_migration.open_migration_view
-#: model:ir.model,name:to_joomla_migration.model_wizard_joomla_migration
-msgid "Joomla Migration Wizard"
-msgstr ""
-
-#. module: to_joomla_migration
-#: model:ir.model,name:to_joomla_migration.model_abstract_j_model
-msgid "Joomla Model Base Class"
+#: model:ir.model,name:to_joomla_migration.model_joomla_migration_url_map
+msgid "Joomla Migration URL Map"
 msgstr ""
 
 #. module: to_joomla_migration
@@ -466,405 +680,498 @@ msgstr ""
 
 #. module: to_joomla_migration
 #: model:ir.model,name:to_joomla_migration.model_joomla_user
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_joomla_user_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__joomla_user_id
 msgid "Joomla User"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_juser_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__joomla_user_ids
 msgid "Joomla Users"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Joomla Website URL (e.g. http://odoo.com)"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_keywords
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__keywords
 msgid "Keywords"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_language
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_language
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_language
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_language
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__language_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__language
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__language_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__language
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__language_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__language
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__language_id
 msgid "Language"
 msgstr "Ngôn ngữ"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_j_model___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user___last_update
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration___last_update
-msgid "Last Modified on"
-msgstr "Sửa lần cuối vào"
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__language
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__language
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__language
+msgid "Language Code"
+msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_write_uid
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_content____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_model____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag____last_update
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user____last_update
+msgid "Last Modified on"
+msgstr "Sửa lần cuối"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__write_uid
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__write_uid
 msgid "Last Updated by"
 msgstr "Cập nhật lần cuối bởi"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_write_date
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__write_date
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__write_date
 msgid "Last Updated on"
 msgstr "Cập nhật lần cuối"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_link
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__link
 msgid "Link"
-msgstr ""
+msgstr "Liên kết"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_j_model_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_m2o_joomla_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_content__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_model__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__m2o_joomla_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__m2o_joomla_ids
 msgid "M2O Joomla"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
-msgid "Mapping"
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+msgid "Map"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_menu_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_menu_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__menu_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__menu_ids
 msgid "Menu"
 msgstr "Trình đơn"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_meta_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__meta_ids
 msgid "Meta"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_metadesc
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__metadesc
 msgid "Metadesc"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_metakey
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__metakey
 msgid "Metakey"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_migrate_to
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__migrate_to
 msgid "Migrate To"
 msgstr ""
 
 #. module: to_joomla_migration
-#: selection:wizard.joomla.migration,state:0
+#: selection:joomla.migration,state:0
 msgid "Migrating"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_migrating_info
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__migrating_info
 msgid "Migrating Info"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_j_model_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_mapping_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_content__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_model__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_category__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_article_map__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__migration_id
 msgid "Migration"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Migration Data"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_migration_track_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_blog_post_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_blog_tag_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_ir_attachment_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_res_partner_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_res_users_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_website_page_migration_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_website_redirect_migration_id
-msgid "Migration Wizard ID"
+#: model:ir.model.fields,field_description:to_joomla_migration.field_abstract_joomla_migration_track__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_account_invoice_send__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_blog_post__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_blog_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_forum_post__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_forum_post_vote__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_forum_tag__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_ir_attachment__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_mail_compose_message__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_mail_mail__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_mail_message__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_res_partner__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_res_users__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_website_page__migration_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_website_redirect__migration_id
+msgid "Migration ID"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_name
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__mime
+msgid "Mime"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__modified_date
+msgid "Modified Date"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_tag__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag__name
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__name
 msgid "Name"
 msgstr "Tên"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_no_reset_password
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__no_reset_password
 msgid "No Reset Password"
 msgstr ""
 
 #. module: to_joomla_migration
-#: code:addons/to_joomla_migration/wizard/wizard_joomla_migration.py:90
+#: code:addons/to_joomla_migration/wizard/joomla_migration.py:73
 #, python-format
 msgid "No data to migrate!"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_odoo_blog_post_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_odoo_blog_post_id
-msgid "Odoo Blog Post"
-msgstr ""
-
-#. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_tag_odoo_blog_tag_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_tag_odoo_blog_tag_id
-msgid "Odoo Blog Tag"
-msgstr ""
-
-#. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_odoo_compat_lang_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_odoo_compat_lang_id
-msgid "Odoo Compat Lang"
-msgstr ""
-
-#. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_odoo_page_id
-msgid "Odoo Page"
-msgstr ""
-
-#. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_mapping_odoo_user_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_odoo_user_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_user_map__odoo_user_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__odoo_user_id
 msgid "Odoo User"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
-msgid ""
-"On migrating, the joomla user that matches with a existing odoo user will be ignore.\n"
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+msgid "On migrating, the joomla user that matches with a existing odoo user will be ignore.\n"
 "                                    Two users are assumed to be matching if they have same email address. The following list\n"
 "                                    already has been populated with some matching couples found automatically, you can edit it before continue."
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_ordering
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__ordering
 msgid "Ordering"
 msgstr ""
 
 #. module: to_joomla_migration
-#: selection:joomla.migration.article.mapping,migrate_to:0
+#: model:ir.model,name:to_joomla_migration.model_website_page
+#: selection:joomla.migration.article.map,migrate_to:0
 msgid "Page"
-msgstr ""
+msgstr "Trang"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_params
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__params
 msgid "Params"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_parent_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_parent_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__parent_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__parent_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__parent_id
 msgid "Parent"
 msgstr "Cấp cha"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category_path
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu_path
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_category__path
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_menu__path
 msgid "Path"
 msgstr "Đường dẫn"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_permalink
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__permalink
 msgid "Permalink"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_post_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__post_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_attachment__post_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__post_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__post_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__post_id
 msgid "Post"
-msgstr ""
+msgstr "Đăng"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_publish_up
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_publish_up
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__publish_up
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__publish_up
 msgid "Publish Up"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_published
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__published
 msgid "Published"
 msgstr "Đã xuất bản"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_redirect
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__redirect
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__redirect
 msgid "Redirect"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Reset"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_sef_url
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_sef_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_blog_post__sef_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_forum_post__sef_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__sef_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__sef_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__sef_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_website_page__sef_url
 msgid "Sef Url"
 msgstr ""
 
 #. module: to_joomla_migration
-#: selection:wizard.joomla.migration,state:0
+#: selection:joomla.migration,state:0
 msgid "Setup"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
-msgid "Start"
-msgstr "Khởi động"
-
-#. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_state
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_state
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_state
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__state
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__state
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__state
 msgid "State"
-msgstr "Bang/Tỉnh"
+msgstr "Bang / Tỉnh"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag_tag_id
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_ids
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag_tag_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__tag_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article_tag__tag_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__tag_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_tag__tag_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__tag_ids
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post_tag__tag_id
 msgid "Tag"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,help:to_joomla_migration.field_abstract_joomla_migration_track_migration_id
-#: model:ir.model.fields,help:to_joomla_migration.field_blog_post_migration_id
-#: model:ir.model.fields,help:to_joomla_migration.field_blog_tag_migration_id
-#: model:ir.model.fields,help:to_joomla_migration.field_ir_attachment_migration_id
-#: model:ir.model.fields,help:to_joomla_migration.field_res_partner_migration_id
-#: model:ir.model.fields,help:to_joomla_migration.field_res_users_migration_id
-#: model:ir.model.fields,help:to_joomla_migration.field_website_page_migration_id
-#: model:ir.model.fields,help:to_joomla_migration.field_website_redirect_migration_id
-msgid ""
-"Technical field to map the record with Migration Wizard record temporarily"
+#: model:ir.model.fields,help:to_joomla_migration.field_abstract_joomla_migration_track__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_account_invoice_send__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_blog_post__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_blog_tag__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_forum_post__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_forum_post_vote__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_forum_tag__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_ir_attachment__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_mail_compose_message__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_mail_mail__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_mail_message__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_res_partner__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_res_users__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_website_page__migration_id
+#: model:ir.model.fields,help:to_joomla_migration.field_website_redirect__migration_id
+msgid "Technical field to map the record with Migration record temporarily"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
-msgid ""
-"This may take a a few minutes to several hours, depending on the amound of "
-"data to migrate. Please backup your Odoo database before doing this. Are you"
-" sure to proceed?"
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
+msgid "This may take a a few minutes to several hours, depending on the amount of data to migrate. Please backup your Odoo database before doing this. Are you sure to proceed?"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_to_blog_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__timezone
+msgid "Timezone"
+msgstr "Múi giờ"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__to_blog_id
 msgid "To Blog"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_to_website_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__to_forum_id
+msgid "To Forum"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration_url_map__to_url
+msgid "To Url"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__to_website_id
 msgid "To Website"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta_type
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_meta__type
 msgid "Type"
 msgstr "Kiểu"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easyblog_post__url
 msgid "Url"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_user_mapping_ids
-msgid "User Mapping"
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__url_map_ids
+msgid "Url Map"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model,name:to_joomla_migration.model_joomla_migration_user_mapping
-msgid "User Migration Mapping"
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_comment__user_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_post__user_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__user_id
+msgid "User"
+msgstr "Người dùng"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__user_map_ids
+msgid "User Map"
 msgstr ""
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user_username
+#: model:ir.model,name:to_joomla_migration.model_joomla_migration_user_map
+msgid "User Migration Map"
+msgstr ""
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_user__username
 msgid "Username"
 msgstr "Tên đăng nhập"
 
 #. module: to_joomla_migration
 #: model:ir.model,name:to_joomla_migration.model_res_users
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Users"
 msgstr "Người dùng"
 
 #. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_easydiscuss_vote__value
+msgid "Value"
+msgstr "Giá trị"
+
+#. module: to_joomla_migration
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "Website"
 msgstr "Trang web"
 
 #. module: to_joomla_migration
-#: model:ir.model.fields,field_description:to_joomla_migration.field_wizard_joomla_migration_website_url
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_article__website_page_id
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__website_page_ids
+msgid "Website Page"
+msgstr "Trang của Website"
+
+#. module: to_joomla_migration
+#: model:ir.model.fields,field_description:to_joomla_migration.field_joomla_migration__website_url
 msgid "Website Url"
-msgstr ""
+msgstr "Đường dẫn Website"
 
 #. module: to_joomla_migration
-#: model:ir.model,name:to_joomla_migration.model_abstract_joomla_migration_track
-msgid "abstract.joomla.migration.track"
-msgstr ""
-
-#. module: to_joomla_migration
-#: model:ir.ui.view,arch_db:to_joomla_migration.wizard_migration_form
+#: model_terms:ir.ui.view,arch_db:to_joomla_migration.migration_form
 msgid "sf2d0_"
 msgstr ""
+
