@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-import logging
-
-from odoo import api, fields, models, _
-
-_logger = logging.getLogger(__name__)
+from odoo import fields, models
 
 
 class JoomlaMigration(models.TransientModel):
@@ -51,13 +46,6 @@ class JoomlaMigration(models.TransientModel):
         super(JoomlaMigration, self)._update_href()
         contents = self.website_document_ids.mapped('content_ids')
         for idx, content in enumerate(contents, start=1):
-            _logger.info('[{}/{}] updating href in doc {}'.format(idx, len(contents), content.parent_id.name))
+            self._logger.info('[{}/{}] updating href in doc {}'.format(idx, len(contents), content.parent_id.name))
             fulltext = self._update_href_in_content(content.fulltext)
             content.fulltext = fulltext
-
-    def _get_records_to_reset(self):
-        res = super(JoomlaMigration, self)._get_records_to_reset()
-        docs = self.env['website.document'].get_migrated_data()
-        tags = self.env['website.doc.tag'].get_migrated_data()
-        res.extend([(docs, 500), (tags, 525)])
-        return res

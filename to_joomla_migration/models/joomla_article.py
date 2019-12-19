@@ -1,10 +1,7 @@
 import json
-import logging
 
 from odoo import api, fields, models
 from odoo.addons.http_routing.models.ir_http import slugify
-
-_logger = logging.getLogger(__name__)
 
 
 class JoomlaArticle(models.TransientModel):
@@ -25,16 +22,17 @@ class JoomlaArticle(models.TransientModel):
     category_id = fields.Many2one('joomla.category', joomla_column='catid')
     category_ids = fields.Many2many('joomla.category', string='Categories', compute='_compute_categories')
     language = fields.Char(joomla_column=True, string='Language Code')
+    language_id = fields.Many2one('res.lang', compute='_compute_language')
     metakey = fields.Text(joomla_column=True)
     metadesc = fields.Text(joomla_column=True)
     ordering = fields.Integer(joomla_column=True)
-    tag_ids = fields.Many2many('joomla.tag', compute='_compute_tags')
+    tag_ids = fields.Many2many('joomla.tag', joomla_relation='contentitem_tag_map',
+                               joomla_column1='content_item_id', joomla_column2='tag_id')
     menu_ids = fields.One2many('joomla.menu', 'article_id')
-    sef_url = fields.Char(index=True)
-    intro_image_url = fields.Char(compute='_compute_intro_image_url', store=True)
-    website_page_id = fields.Many2one('website.page')
-    blog_post_id = fields.Many2one('blog.post')
-    language_id = fields.Many2one('res.lang')
+    sef_url = fields.Char(compute='_compute_sef_url')
+    intro_image_url = fields.Char(compute='_compute_intro_image_url')
+    odoo_website_page_id = fields.Many2one('website.page')
+    odoo_blog_post_id = fields.Many2one('blog.post')
 
     def _compute_categories(self):
         for article in self:
@@ -54,36 +52,27 @@ class JoomlaArticle(models.TransientModel):
                     url = '/' + url
                 article.intro_image_url = url
             except json.JSONDecodeError:
-                pass
+                article.intro_image_url = False
 
-    def _compute_tags(self):
-        article_tag = self.env['joomla.article.tag'].search([('article_id', 'in', self.ids)])
-        for article in self:
-            article.tag_ids = article_tag.filtered(lambda at: at.article_id == article).mapped('tag_id')
-
-    @api.model
-    def _post_load_data(self):
-        super(JoomlaArticle, self)._post_load_data()
-        articles = self.search([])
-        articles._compute_language()
-        articles._compute_sef_url()
-
+    @api.depends('language', 'menu_ids.language', 'category_ids.language')
     def _compute_language(self):
         for article in self:
-            if not self._is_lang_code(article.language) and article.menu_ids:
+            language = self._get_lang_from_code(article.language)
+            if not language and article.menu_ids:
                 menu = article.menu_ids[0]
                 while menu.parent_id:
-                    if self._is_lang_code(menu.language):
-                        article.language = menu.language
+                    language = self._get_lang_from_code(menu.language)
+                    if language:
                         break
                     menu = menu.parent_id
-            if not self._is_lang_code(article.language):
-                for category in article.category_ids:
-                    if self._is_lang_code(category.language):
-                        article.language = category.language
-                        break
-            article.language_id = self._get_lang_from_code(article.language)
+                else:
+                    for category in article.category_ids:
+                        language = self._get_lang_from_code(category.language)
+                        if language:
+                            break
+            article.language_id = language
 
+    @api.depends('language_id', 'menu_ids.path', 'category_ids.alias')
     def _compute_sef_url(self):
         """
         Ref: https://docs.joomla.org/Special:MyLanguage/Search_Engine_Friendly_URLs
@@ -104,10 +93,8 @@ class JoomlaArticle(models.TransientModel):
                     url_segments = [menu.path, *url_category_segments, seg]
                     url = '/' + '/'.join(url_segments)
                     break
-            if not url:
-                continue
-            if self._is_lang_code(article.language):
-                url = '/' + article.language[:2] + url
+            if url and article.language_id:
+                url = '/' + article.language_id.code[:2] + url
             article.sef_url = url
 
     def _prepare_website_page_values(self):
@@ -158,28 +145,24 @@ class JoomlaArticle(models.TransientModel):
         )
         return values
 
-    def _migrate_to_website_page(self):
+    def _migrate_to_website_page(self, matching_record):
         self.ensure_one()
+        if matching_record:
+            return matching_record
         values = self._prepare_website_page_values()
-        self.website_page_id = self.env['website.page'].create(values)
-        self._add_url_map(self.sef_url, self.website_page_id.sef_url)
+        page = self.env['website.page'].create(values)
+        self._add_url_map(page.sef_url, self.sef_url)
+        return page
 
     def migrate_to_website_page(self):
-        migrated_data_map = self.env['website.page'].get_migrated_data_map()
-        for idx, article in enumerate(self, start=1):
-            _logger.info('[{}/{}] migrating page {}'.format(idx, len(self), article.alias))
-            if article.joomla_id in migrated_data_map:
-                _logger.info('ignore, already migrated')
-                article.website_page_id = migrated_data_map[article.joomla_id]
-            else:
-                article._migrate_to_website_page()
+        super(JoomlaArticle, self).migrate(result_field='odoo_website_page_id', meth='_migrate_to_website_page')
 
     def _prepare_blog_post_values(self):
         self.ensure_one()
         values = self._prepare_track_values()
-        author = self.author_id.odoo_user_id.partner_id or self._get_default_partner()
+        author = self.author_id.odoo_id.partner_id or self._get_default_partner()
         content = self._prepare_blog_post_content(self.introtext + self.fulltext, self.intro_image_url)
-        tags = self.tag_ids.mapped('blog_tag_id')
+        tags = self.tag_ids.mapped('odoo_blog_tag_id')
         values.update(
             name=self.name,
             author_id=author.id,
@@ -194,18 +177,13 @@ class JoomlaArticle(models.TransientModel):
         )
         return values
 
-    def _migrate_to_blog_post(self):
+    def _migrate_to_blog_post(self, matching_record):
         self.ensure_one()
+        if matching_record:
+            return matching_record
         values = self._prepare_blog_post_values()
-        self.blog_post_id = self.env['blog.post'].create(values)
-        self._add_url_map(self.sef_url, self.blog_post_id.sef_url)
+        post = self.env['blog.post'].create(values)
+        self._add_url_map(post.sef_url, self.sef_url)
 
     def migrate_to_blog_post(self):
-        migrated_data_map = self.env['blog.post'].get_migrated_data_map()
-        for idx, article in enumerate(self, start=1):
-            _logger.info('[{}/{}] migrating blog post {}'.format(idx, len(self), article.alias))
-            if article.joomla_id in migrated_data_map:
-                _logger.info('ignore, already migrated')
-                article.blog_post_id = migrated_data_map[article.joomla_id]
-            else:
-                article._migrate_to_blog_post()
+        super(JoomlaArticle, self).migrate(result_field='odoo_blog_post_id', meth='_migrate_to_blog_post')

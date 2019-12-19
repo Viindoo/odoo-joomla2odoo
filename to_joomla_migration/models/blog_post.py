@@ -1,3 +1,5 @@
+import datetime
+
 from odoo import models, fields, api
 from odoo.addons.http_routing.models.ir_http import slugify
 
@@ -7,8 +9,7 @@ class BlogPost(models.Model):
 
     sef_url = fields.Char(compute='_compute_sef_url')
 
-    @api.depends('language_id', 'language_id.code', 'name',
-                 'blog_id', 'blog_id.name')
+    @api.depends('name', 'language_id.code', 'blog_id.name')
     def _compute_sef_url(self):
         for post in self:
             url = ''

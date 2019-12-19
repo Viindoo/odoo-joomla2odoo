@@ -9,11 +9,12 @@ _logger = logging.getLogger(__name__)
 class User(models.Model):
     _inherit = 'res.users'
 
-    created_from_existing_partner = fields.Boolean()
-
     def get_new_migrated_website(self):
-        domain = self.migration_id.to_website_id.domain
-        return 'http://{}'.format(domain) if domain else ''
+        migration = self._context.get('joomla_migration')
+        if migration:
+            domain = migration.to_website_id.domain
+            return 'http://{}'.format(domain) if domain else ''
+        return ''
 
     @api.multi
     def action_reset_password(self):
@@ -48,6 +49,3 @@ class User(models.Model):
                 with self.env.cr.savepoint():
                     template.with_context(lang=user.lang).send_mail(user.id, force_send=True, raise_exception=True)
                 _logger.info("Password reset email sent for user <%s> to <%s>", user.login, user.email)
-
-    def get_migrated_data(self):
-        return self.with_context(active_test=False).search([('migration_id', '!=', False)])

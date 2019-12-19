@@ -1,22 +1,18 @@
-import logging
-
 from odoo import models, fields
-
-_logger = logging.getLogger(__name__)
 
 
 class JoomlaMigration(models.TransientModel):
     _inherit = 'joomla.migration'
 
-    include_article = fields.Boolean(default=True)
+    include_article = fields.Boolean()
     category_ids = fields.One2many('joomla.category', 'migration_id')
     article_ids = fields.One2many('joomla.article', 'migration_id')
     article_map_ids = fields.One2many('joomla.migration.article.map', 'migration_id')
 
-    def get_joomla_models(self):
-        jmodels = super(JoomlaMigration, self).get_joomla_models()
+    def _get_joomla_models(self):
+        jmodels = super(JoomlaMigration, self)._get_joomla_models()
         if self.include_article:
-            for model in ['joomla.category', 'joomla.article', 'joomla.tag', 'joomla.article.tag', 'joomla.menu']:
+            for model in ['joomla.category', 'joomla.article', 'joomla.tag', 'joomla.menu']:
                 jmodels[model] = 200
         return jmodels
 
@@ -40,15 +36,6 @@ class JoomlaMigration(models.TransientModel):
         page_articles.migrate_to_website_page()
         blog_articles.mapped('tag_ids').migrate_to_blog_tag()
         blog_articles.migrate_to_blog_post()
-
-    def _get_records_to_reset(self):
-        res = super(JoomlaMigration, self)._get_records_to_reset()
-        pages = self.env['website.page'].get_migrated_data()
-        views = pages.mapped('view_id')
-        posts = self.env['blog.post'].get_migrated_data()
-        tags = self.env['blog.tag'].get_migrated_data()
-        res.extend([(pages, 500), (views, 525), (posts, 550), (tags, 575)])
-        return res
 
 
 class ArticleMap(models.TransientModel):

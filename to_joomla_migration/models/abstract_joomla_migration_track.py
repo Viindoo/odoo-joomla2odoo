@@ -19,7 +19,3 @@ class AbstractJoomlaMigrationTrack(models.AbstractModel):
         if jtable:
             domain = expression.AND([domain, [('old_website_model', '=', jtable)]])
         return self.with_context(active_test=False).search(domain)
-
-    def get_migrated_data_map(self, website=None, jtable=None):
-        data = self.get_migrated_data(website, jtable)
-        return {r.old_website_record_id: r for r in data}

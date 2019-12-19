@@ -8,7 +8,7 @@ class JoomlaTag(models.TransientModel):
     _joomla_table = 'tags'
 
     name = fields.Char(joomla_column='title')
-    blog_tag_id = fields.Many2one('blog.tag')
+    odoo_blog_tag_id = fields.Many2one('blog.tag')
 
     def _prepare_blog_tag_values(self):
         self.ensure_one()
@@ -16,12 +16,15 @@ class JoomlaTag(models.TransientModel):
         values.update(name=self.name)
         return values
 
+    def _get_matching_data(self, odoo_model):
+        return self._get_matching_data_by_name(odoo_model)
+
+    def _migrate_to_blog_tag(self, matching_record):
+        if matching_record:
+            return matching_record
+        values = self._prepare_blog_tag_values()
+        tag = self.env['blog.tag'].create(values)
+        return tag
+
     def migrate_to_blog_tag(self):
-        tags = self.env['blog.tag'].search([])
-        tag_names = {r.name: r for r in tags}
-        for jtag in self:
-            tag = tag_names.get(jtag.name)
-            if not tag:
-                values = jtag._prepare_blog_tag_values()
-                tag = tags.create(values)
-            jtag.blog_tag_id = tag
+        super(JoomlaTag, self).migrate(result_field='odoo_blog_tag_id', meth='_migrate_to_blog_tag')

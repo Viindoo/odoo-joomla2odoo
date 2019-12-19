@@ -1,12 +1,9 @@
-import base64
 import logging
-import urllib.parse
-import urllib.request
 
 import lxml.html
 
 from odoo import models, release
-from odoo.tools import html_sanitize, ormcache
+from odoo.tools import html_sanitize
 
 _logger = logging.getLogger(__name__)
 

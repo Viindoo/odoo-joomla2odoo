@@ -1,16 +1,12 @@
 import base64
-import json
 import logging
 import urllib.parse
 
-import mysql.connector
 import requests
 
-from odoo import api, fields, models, SUPERUSER_ID
-from odoo.exceptions import UserError
+from odoo import fields, models, api, SUPERUSER_ID
+from odoo.osv import expression
 from odoo.tools import ormcache
-
-_logger = logging.getLogger(__name__)
 
 
 class AbstractJoomlaModel(models.AbstractModel):
@@ -31,104 +27,22 @@ class AbstractJoomlaModel(models.AbstractModel):
     _description = 'Abstract Joomla Model'
     _joomla_table = False
 
-    joomla_id = fields.Integer(joomla_column='id', index=True)
+    joomla_id = fields.Integer(joomla_column='id', index=True, help='ID of the origin record in Joomla')
     migration_id = fields.Many2one('joomla.migration', required=True, ondelete='cascade')
-    m2o_joomla_ids = fields.Text()
+    m2o_info = fields.Text(help='Store info about origin references of many2one fields in Joomla for resolving after loading data')
 
-    @api.model
-    def _load_data(self, migration):
-        try:
-            connection = mysql.connector.connect(
-                host=migration.host_address,
-                port=migration.host_port,
-                user=migration.db_user,
-                password=migration.db_password,
-                database=migration.db_name)
-        except mysql.connector.Error as e:
-            raise UserError(e.msg)
+    @property
+    def _logger(self):
+        return logging.getLogger(self._name)
 
-        try:
-            cursor = connection.cursor()
-            query = self._prepare_select_query(migration)
-            cursor.execute(query)
-            column_names = cursor.column_names
-            rows = cursor.fetchall()
-        except mysql.connector.Error as e:
-            raise UserError(e.msg)
-        finally:
-            connection.close()
+    def search(self, args, offset=0, limit=None, order=None, count=False):
+        migration = self._get_current_migration()
+        if migration:
+            args = expression.AND([args, [('migration_id', '=', migration.id)]])
+        return super(AbstractJoomlaModel, self).search(args, offset, limit, order, count)
 
-        for row in rows:
-            values = dict(zip(column_names, row))
-            for k in values:
-                if isinstance(values[k], bytearray):
-                    values[k] = values[k].decode()
-            m2o_joomla_ids = {}
-            for k in list(values):
-                if k.startswith('joomla_') and k != 'joomla_id':
-                    m2o_joomla_ids[k[7:]] = values.pop(k)
-            values.update(migration_id=migration.id,
-                          m2o_joomla_ids=json.dumps(m2o_joomla_ids))
-            self.create(values)
-
-    @api.model
-    def _prepare_select_query(self, migration):
-        table = self._joomla_table
-        assert isinstance(table, str)
-        if migration.db_table_prefix:
-            table = migration.db_table_prefix + table
-
-        field_map = {}  # field -> field alias
-        for field in self._fields.values():
-            joomla_column = field._attrs.get('joomla_column')
-            if not joomla_column:
-                continue
-            alias = field.name
-            if field.type == 'many2one':
-                alias = 'joomla_' + alias
-            if joomla_column is True:
-                field_map[field.name] = alias
-            elif isinstance(joomla_column, str):
-                field_map[joomla_column] = alias
-
-        select_expr = []
-        for name, alias in field_map.items():
-            if name == alias:
-                select_expr.append('`{}`'.format(name))
-            else:
-                select_expr.append('`{}` as `{}`'.format(name, alias))
-
-        select_expr_s = ', '.join(select_expr)
-        query = """SELECT {} FROM {}""".format(select_expr_s, table)
-        if 'id' in field_map:
-            query += " ORDER BY id"
-        return query
-
-    @api.model
-    def _resolve_m2o_fields(self):
-        m2o_joomla_fields = []
-        for field in self._fields.values():
-            if field.type == 'many2one' and field._attrs.get('joomla_column'):
-                m2o_joomla_fields.append(field)
-
-        if not m2o_joomla_fields:
-            return
-
-        records = self.search([])
-        for r in records:
-            values = {}
-            m2o_joomla_ids = json.loads(r.m2o_joomla_ids)
-            for field in m2o_joomla_fields:
-                domain = [('joomla_id', '=', m2o_joomla_ids[field.name])]
-                ref = self.env[field.comodel_name].search(domain, limit=1)
-                values[field.name] = ref.id
-            r.write(values)
-
-    @api.model
     def _post_load_data(self):
-        """
-        Executed after all models are loaded and m2o fields are resolved.
-        """
+        """ Executed after all models are loaded and relational fields are resolved """
         pass
 
     def _prepare_track_values(self):
@@ -141,8 +55,8 @@ class AbstractJoomlaModel(models.AbstractModel):
         }
 
     def _get_jtable_fullname(self):
-        migration = self[0].migration_id or self._get_current_migration()
-        return migration.db_table_prefix + self._joomla_table
+        migration = self[:1].migration_id or self._get_current_migration()
+        return migration._get_jtable_fullname(self._joomla_table)
 
     def _get_current_migration(self):
         return self.env['joomla.migration'].get_current_migration()
@@ -158,18 +72,15 @@ class AbstractJoomlaModel(models.AbstractModel):
     def _get_lang_id_from_code(self, code):
         lang = self.env['res.lang']
         code = code.replace('-', '_')
-        active_lang = lang.search([('active', '=', True)])
-        exact_matches = active_lang.filtered(lambda r: r.code == code)
+        all_langs = lang.search([])
+        exact_matches = all_langs.filtered(lambda r: r.code == code)
         if exact_matches:
             lang = exact_matches[0]
         else:
-            nearest_matches = active_lang.filtered(lambda r: r.code.startswith(code[:2]))
+            nearest_matches = all_langs.filtered(lambda r: r.code.startswith(code[:2]))
             if nearest_matches:
                 lang = nearest_matches[0]
         return lang.id
-
-    def _is_lang_code(self, code):
-        return code and self._get_lang_id_from_code(code)
 
     def _get_default_user(self):
         return self.env['res.users'].browse(SUPERUSER_ID)
@@ -181,11 +92,11 @@ class AbstractJoomlaModel(models.AbstractModel):
         if not url:
             return None
         absolute_url = urllib.parse.urljoin(self.migration_id.website_url, url)
-        _logger.info('downloading {}'.format(absolute_url))
+        self._logger.info('downloading {}'.format(absolute_url))
         try:
             return requests.get(absolute_url).content
         except Exception as e:
-            _logger.warning('failed to download {}\n'.format(absolute_url, e))
+            self._logger.warning('failed to download {}\n'.format(absolute_url, e))
             return None
 
     def _prepare_attachment_values(self, name, data_b64):
@@ -203,12 +114,48 @@ class AbstractJoomlaModel(models.AbstractModel):
 
     def _migrate_attachment(self, download_url, name=None):
         self.ensure_one()
+        attachment = self.env['ir.attachment']
         data = self._download_file(download_url)
         if not data:
-            return None
+            return attachment
         data_b64 = base64.b64encode(data)
         if not name:
             name = download_url.rsplit('/', maxsplit=1)[-1]
         values = self._prepare_attachment_values(name, data_b64)
-        attachment = self.env['ir.attachment'].create(values)
+        attachment = attachment.create(values)
         return attachment
+
+    def _get_matching_data(self, odoo_model):
+        return self._get_matching_data_by_track(odoo_model)
+
+    def _get_matching_data_by_track(self, odoo_model):
+        try:
+            data = self.env[odoo_model].get_migrated_data(jtable=self._get_jtable_fullname())
+        except AttributeError:
+            return {}
+        id_map1 = {r.old_website_record_id: r for r in data}
+        id_map2 = {r: r.joomla_id for r in self.search([])}
+        return {r: id_map1[_id] for r, _id in id_map2.items() if _id in id_map1}
+
+    def _get_matching_data_by_name(self, odoo_model):
+        return self._get_matching_data_by_field(odoo_model, 'name', 'name')
+
+    def _get_matching_data_by_field(self, odoo_model, j_field_name, o_field_name):
+        map1 = {r[o_field_name]: r for r in self.env[odoo_model].search([])}
+        map2 = {r: r[j_field_name] for r in self.search([])}
+        return {r: map1[field] for r, field in map2.items() if field in map1}
+
+    def _migrate(self):
+        return False
+
+    @api.noguess
+    def migrate(self, *args, result_field='odoo_id', meth='_migrate', **kwargs):
+        field = self._fields[result_field]
+        data = self._get_matching_data(field.comodel_name)
+        for idx, record in enumerate(self, start=1):
+            self._logger.info('[{}/{}] migrating {}'.format(idx, len(self), record.display_name))
+            result = data.get(record, self.env[field.comodel_name])
+            if not result:
+                result = getattr(record, meth)(*args, **kwargs)
+            record[result_field] = result
+            self._cr.commit()

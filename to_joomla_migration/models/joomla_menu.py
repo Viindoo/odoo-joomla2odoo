@@ -17,10 +17,9 @@ class JoomlaMenu(models.TransientModel):
     category_id = fields.Many2one('joomla.category')
     easyblog = fields.Boolean()
 
-    @api.model
-    def _resolve_m2o_fields(self):
-        super(JoomlaMenu, self)._resolve_m2o_fields()
-        self.search([])._compute_params()
+    def _post_load_data(self):
+        super(JoomlaMenu, self)._post_load_data()
+        self._compute_params()
 
     def _compute_params(self):
         for menu in self:
@@ -33,11 +32,8 @@ class JoomlaMenu(models.TransientModel):
             jid = int(query.get('id', False))
             if option == 'com_content' and jid:
                 if view == 'article':
-                    menu.article_id = self.env['joomla.article'].search(
-                        [('joomla_id', '=', jid)], limit=1).id
+                    menu.article = self.env['joomla.article'].search([('joomla_id', '=', jid)], limit=1)
                 elif view in ['category', 'categories']:
-                    menu.category_id = self.env['joomla.category'].search(
-                        [('joomla_id', '=', jid)], limit=1).id
+                    menu.category = self.env['joomla.category'].search([('joomla_id', '=', jid)], limit=1)
             elif option == 'com_easyblog' and view == 'latest':
                 menu.easyblog = True
-

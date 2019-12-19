@@ -64,12 +64,6 @@ class JoomlaMigration(models.TransientModel):
     def _get_url_map(self, from_url):
         return self.env['joomla.migration.url.map'].search([('from_url', '=', from_url)], limit=1)
 
-    def _get_records_to_reset(self):
-        res = super(JoomlaMigration, self)._get_records_to_reset()
-        redirects = self.env['website.redirect'].get_migrated_data()
-        res.extend([(redirects, 1100)])
-        return res
-
 
 class JoomlaMigrationUrlMap(models.TransientModel):
     _name = 'joomla.migration.url.map'

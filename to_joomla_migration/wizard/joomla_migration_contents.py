@@ -1,12 +1,9 @@
-import logging
 import re
 import urllib.parse
 
 import lxml.html
 
 from odoo import models, fields
-
-_logger = logging.getLogger(__name__)
 
 
 class JoomlaMigration(models.TransientModel):
@@ -21,12 +18,12 @@ class JoomlaMigration(models.TransientModel):
 
     def _update_href(self):
         for idx, page in enumerate(self.website_page_ids, start=1):
-            _logger.info('[{}/{}] updating href in page {}'.format(idx, len(self.website_page_ids), page.name))
+            self._logger.info('[{}/{}] updating href in page {}'.format(idx, len(self.website_page_ids), page.name))
             content = self._update_href_in_content(page.view_id.arch_base, 'xml')
             page.view_id.arch_base = content
 
         for idx, post in enumerate(self.blog_post_ids, start=1):
-            _logger.info('[{}/{}] updating href in blog post {}'.format(idx, len(self.blog_post_ids), post.name))
+            self._logger.info('[{}/{}] updating href in blog post {}'.format(idx, len(self.blog_post_ids), post.name))
             content = self._update_href_in_content(post.content)
             post.content = content
 
@@ -46,11 +43,11 @@ class JoomlaMigration(models.TransientModel):
                 url_map = self._get_url_map(url)
                 if not url_map:
                     a.drop_tag()
-                    _logger.info('dropped href {}'.format(url))
+                    self._logger.info('dropped href {}'.format(url))
                 else:
                     new_url = url_map.to_url
                     a.set('href', new_url)
-                    _logger.info('converted href from {} to {}'.format(url, new_url))
+                    self._logger.info('converted href from {} to {}'.format(url, new_url))
         return lxml.html.tostring(et, encoding='unicode', method=output_type)
 
     def _is_internal_url(self, url):
