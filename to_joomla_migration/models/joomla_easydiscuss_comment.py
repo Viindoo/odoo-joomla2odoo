@@ -16,7 +16,7 @@ class EasyDiscussComment(models.TransientModel):
     def _prepare_mail_message_values(self):
         self.ensure_one()
         values = self._prepare_track_values()
-        author = self.user_id.odoo_id.partner_id or self._get_default_partner()
+        author = self.user_id.odoo_id or self._get_default_partner()
         comment = self._get_html_comment()
         values.update(
             author_id=author.id,

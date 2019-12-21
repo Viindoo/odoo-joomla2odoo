@@ -1,5 +1,4 @@
 import ast
-from collections import defaultdict
 
 from odoo import api, fields, models
 from odoo.tools import pycompat
@@ -18,7 +17,7 @@ class JoomlaUser(models.TransientModel):
     params = fields.Char(joomla_column=True)
     language_id = fields.Many2one('res.lang', compute='_compute_params_info')
     timezone = fields.Char(compute='_compute_params_info')
-    odoo_id = fields.Many2one('res.users')
+    odoo_id = fields.Many2one('res.partner')
 
     @api.depends('params')
     def _compute_params_info(self):
@@ -34,53 +33,30 @@ class JoomlaUser(models.TransientModel):
             name=self.name,
             tz=self.timezone or self.env.user.tz,
             groups_id=[(4, self.env.ref('base.group_portal').id)],
-            login=self.name,
+            login=self.username,
             email=self.email,
-            website_id=self.migration_id.to_website_id.id
+            website_id=self.migration_id.to_website_id.id,
+            active=not self.block
         )
         if self.language_id:
             values.update(lang=self.language_id.code)
         return values
 
     def _get_matching_data(self, odoo_model):
-        migration = self._get_current_migration()
-        if migration:
-            return {m.joomla_user_id: m.odoo_user_id for m in migration.user_map_ids}
         return {}
 
-    def _migrate(self, existing_logins, email_partner_map):
+    def _migrate(self, user_map):
         self.ensure_one()
-        user = self.env['res.users']
-        login = self.username
-        if login in existing_logins:
-            login = self.email
-        if login in existing_logins:
-            self._logger.warning('ignore, invalid login')
-            return user
         values = self._prepare_odoo_user_values()
-        values.update(login=login)
-
-        partner = self.env['res.partner']
-        partners = email_partner_map.get(self.email)
-        if partners and len(partners) == 1:
-            partner = partners[0]
+        partner = user_map.get(self)
         if partner:
-            self._logger.info('create from existing partner')
+            if partner.user_ids:
+                return partner
+            self._logger.info('create user from existing partner')
             values.update(partner_id=partner.id)
-
-        user = user.create(values)
-        if self.block:
-            user.active = False
-        return user
+        user = self.env['res.users'].create(values)
+        return user.partner_id
 
     def migrate(self):
-        partners = self.env['res.partner'].search([])
-        email_partner_map = defaultdict(list)
-        for partner in partners:
-            if partner.email:
-                email_partner_map[partner.email].append(partner)
-
-        existing_users = self.env['res.users'].search([])
-        existing_logins = {user.login for user in existing_users}
-
-        super(JoomlaUser, self).migrate(existing_logins, email_partner_map)
+        user_map = {r.joomla_user_id: r.odoo_partner_id for r in self.migration_id.user_map_ids}
+        super(JoomlaUser, self).migrate(user_map)

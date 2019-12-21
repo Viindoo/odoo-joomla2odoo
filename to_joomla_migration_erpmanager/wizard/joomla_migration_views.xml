@@ -9,4 +9,15 @@
             </field>
         </field>
     </record>
+
+    <record id="user_map_search" model="ir.ui.view">
+        <field name="name">joomla.migration.user.map.search.inherit.erpmanager</field>
+        <field name="model">joomla.migration.user.map</field>
+        <field name="inherit_id" ref="to_joomla_migration.user_map_search"/>
+        <field name="arch" type="xml">
+            <search>
+                <filter string="Customer" name="is_customer" domain="[('is_customer', '=', True)]"/>
+            </search>
+        </field>
+    </record>
 </odoo>

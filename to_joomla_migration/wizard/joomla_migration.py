@@ -14,6 +14,7 @@ from odoo.exceptions import UserError, ValidationError
 class JoomlaMigration(models.TransientModel):
     _name = 'joomla.migration'
     _description = 'Joomla Migration'
+    _rec_name = 'website_url'
 
     def _default_to_website(self):
         return self.env['website'].search([], limit=1)
@@ -49,26 +50,7 @@ class JoomlaMigration(models.TransientModel):
             message = _('Invalid website URL!. Website URL should be like http[s]://your.domain')
             raise ValidationError(message)
 
-    @api.model
-    def default_get(self, fields_list):
-        # Restore last setup info
-        values = super(JoomlaMigration, self).default_get(fields_list)
-        last = self.env['joomla.migration'].search([], limit=1, order='id desc')
-        if last:
-            last_values = last.copy_data()[0]
-            values.update(last_values)
-        return values
-
-    def _get_window_action(self):
-        action = self.env.ref('to_joomla_migration.open_migration_view')
-        values = action.read()[0]
-        values.update(res_id=self.id)
-        return values
-
     def load_data(self):
-        old_data = self.search([('id', '!=', self.id)])
-        old_data.unlink()
-
         self._logger.info('loading data...')
         if not self.with_context(active_test=False)._load_data():
             raise UserError(_('No data to migrate!'))
@@ -76,8 +58,6 @@ class JoomlaMigration(models.TransientModel):
 
         self.state = 'migrating'
         self.migrating_info = self._get_migrating_info()
-
-        return self._get_window_action()
 
     def _load_data(self):
         items = self._get_joomla_models()
@@ -240,3 +220,13 @@ class JoomlaMigration(models.TransientModel):
 
     def _post_migrate_data(self):
         pass
+
+    def back(self):
+        self.ensure_one()
+        if self.state == 'migrating':
+            self._unload_data()
+            self.state = 'setup'
+
+    def _unload_data(self):
+        for model in self._get_joomla_models():
+            self.env[model].search([]).unlink()

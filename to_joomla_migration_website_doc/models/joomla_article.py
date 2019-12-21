@@ -9,7 +9,7 @@ class JoomlaArticle(models.TransientModel):
     def _prepare_website_doc_values(self):
         self.ensure_one()
         values = self._prepare_track_values()
-        author = self.author_id.odoo_id.partner_id or self._get_default_partner()
+        author = self.author_id.odoo_id or self._get_default_partner()
         tags = self.tag_ids.mapped('odoo_doc_tag_id')
         values.update(
             name=self.name,

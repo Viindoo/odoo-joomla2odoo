@@ -160,7 +160,7 @@ class JoomlaArticle(models.TransientModel):
     def _prepare_blog_post_values(self):
         self.ensure_one()
         values = self._prepare_track_values()
-        author = self.author_id.odoo_id.partner_id or self._get_default_partner()
+        author = self.author_id.odoo_id or self._get_default_partner()
         content = self._prepare_blog_post_content(self.introtext + self.fulltext, self.intro_image_url)
         tags = self.tag_ids.mapped('odoo_blog_tag_id')
         values.update(

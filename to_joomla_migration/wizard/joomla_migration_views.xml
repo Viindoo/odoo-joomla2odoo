@@ -11,6 +11,7 @@
                     <button string="Continue" name="migrate_data" type="object"
                             class="oe_highlight" states="migrating"
                             confirm="This may take a a few minutes to several hours, depending on the amount of data to migrate. Please backup your Odoo database before doing this. Are you sure to proceed?"/>
+                    <button string="Back" name="back" type="object" states="migrating"/>
                 </header>
                 <div states="setup">
                     <h3>
@@ -46,26 +47,25 @@
                     </group>
                 </div>
                 <div states="migrating">
+                    <h6>Data</h6>
                     <div role="alert" class="alert alert-info">
-                        <pre class="mb-0"><field name="migrating_info" readonly="1"/></pre>
+                        <pre class="mb-0"><field name="migrating_info" readonly="1" class="mb-0"/></pre>
                     </div>
-                    <group string="Map">
+                    <group>
                         <notebook colspan="2">
                             <page string="Users" attrs="{'invisible': [('include_user', '=', False)]}">
                             	<group>
                             		<field name="no_reset_password"/>
                             	</group>
-                                <div role="alert" class="alert alert-info" style="margin: 3px 0">
-                                    On migrating, the joomla user that matches with a existing odoo user will be ignore.
-                                    Two users are assumed to be matching if they have same email address. The following list
-                                    already has been populated with some matching couples found automatically, you can edit it before continue.
+                                <div role="alert" class="alert alert-info">
+                                    On migrating, if a joomla user that maps with a existing odoo partner:
+                                    <ul>
+                                        <li>If there are no existing odoo users who is associated with the partner, create a new user from the partner.</li>
+                                        <li>Otherwise, don't migrate the user.</li>
+                                    </ul>
+                                    Click <b>User Map</b> to view and update user map before continue.
                                 </div>
-                                <field name="user_map_ids">
-                                    <tree editable="top">
-                                        <field name="joomla_user_id" options="{'no_create_edit': True}" required="1"/>
-                                        <field name="odoo_user_id" required="1"/>
-                                    </tree>
-                                </field>
+                                <button name="action_view_user_map" type="object" string="User Map" class="or_highlight" />
                             </page>
                             <page string="Articles" attrs="{'invisible': [('include_article', '=', False)]}">
                                 <div role='alert' class="alert alert-info" style="margin: 3px 0">
@@ -89,11 +89,35 @@
         </field>
     </record>
 
+    <record id="user_map_tree" model="ir.ui.view">
+        <field name="name">joomla.migration.user.map.tree</field>
+        <field name="model">joomla.migration.user.map</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="joomla_user_idx"/>
+                <field name="joomla_user_id" options="{'no_create_edit': True}"/>
+                <field name="odoo_partner_idx"/>
+                <field name="odoo_partner_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="user_map_search" model="ir.ui.view">
+        <field name="name">joomla.migration.user.map.search</field>
+        <field name="model">joomla.migration.user.map</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="joomla_user_id"/>
+                <field name="odoo_partner_id"/>
+            </search>
+        </field>
+    </record>
+
     <record id="open_migration_view" model="ir.actions.act_window">
         <field name="name">Joomla Migration</field>
         <field name="res_model">joomla.migration</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">current</field>
     </record>
 
     <menuitem id="menu_joomla_migration"

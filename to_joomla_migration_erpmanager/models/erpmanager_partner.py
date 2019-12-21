@@ -8,4 +8,5 @@ class ERPManagerPartner(models.TransientModel):
     _joomla_table = 'erpmanager_partner'
 
     uid = fields.Many2one('joomla.user', joomla_column=True)
-    odoo_id = fields.Many2one('res.partner', related='uid.odoo_id.partner_id')
+    company_name = fields.Char(joomla_column=True)
+    odoo_id = fields.Many2one('res.partner', related='uid.odoo_id')
