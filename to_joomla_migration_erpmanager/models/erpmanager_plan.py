@@ -17,6 +17,14 @@ class ERPManagerPlan(models.TransientModel):
     isaddon = fields.Boolean(joomla_column=True)
     odoo_id = fields.Many2one('product.product')
 
+    def _get_matching_data(self, odoo_model):
+        data = super(ERPManagerPlan, self)._get_matching_data()
+        migration = self._get_current_migration()
+        for item in migration.plan_map_ids:
+            if item.joomla_plan_id not in data and item.odoo_product_id:
+                data[item.joomla_plan_id] = item.odoo_product_id
+        return data
+
     def _prepare_product_template_values(self):
         self.ensure_one()
         values = dict(

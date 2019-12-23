@@ -7,6 +7,16 @@
             <field name="include_easydiscuss" position="after">
 				<field name="include_erpmanager" string="ERPManager"/>
             </field>
+            <notebook position="inside">
+                <page string="Odoo Plans" attrs="{'invisible': [('include_erpmanager', '=', False)]}">
+                    <field name="plan_map_ids">
+                        <tree editable="bottom">
+                            <field name="joomla_plan_id" />
+                            <field name="odoo_product_id" />
+                        </tree>
+                    </field>
+                </page>
+            </notebook>
         </field>
     </record>
 

@@ -6,6 +6,7 @@ class JoomlaMigration(models.TransientModel):
 
     include_erpmanager = fields.Boolean()
     db_table_prefix = fields.Char(default='lgzds_')
+
     partner_ids = fields.One2many('erpmanager.partner', 'migration_id')
     saleorder_ids = fields.One2many('erpmanager.saleorder', 'migration_id')
     wallet_ids = fields.One2many('erpmanager.wallet', 'migration_id')
@@ -31,6 +32,8 @@ class JoomlaMigration(models.TransientModel):
     instance_history_split_ids = fields.One2many('erpmanager.instance.history.split', 'migration_id')
     backup_ids = fields.One2many('erpmanager.backup', 'migration_id')
 
+    plan_map_ids = fields.One2many('joomla.migration.erpmanger.plan.map', 'migration_id')
+
     def _get_joomla_models(self):
         jmodels = super(JoomlaMigration, self)._get_joomla_models()
         if self.include_erpmanager:
@@ -41,8 +44,10 @@ class JoomlaMigration(models.TransientModel):
 
     def _load_data(self):
         res = super(JoomlaMigration, self)._load_data()
-        if self.include_user and self.include_erpmanager:
-            self._update_user_map()
+        if self.include_erpmanager:
+            if self.include_user:
+                self._update_user_map()
+            self._init_plan_map()
         return res
 
     def _update_user_map(self):
@@ -79,6 +84,13 @@ class JoomlaMigration(models.TransientModel):
             context['search_default_is_customer'] = 1
             res['context'] = context
         return res
+
+    def _init_plan_map(self):
+        for plan in self.plan_ids.filtered(lambda p: not p.istrial):
+            self.plan_map_ids.create(dict(
+                migration_id=self.id,
+                joomla_plan_id=plan.id
+            ))
 
     def _migrate_data(self):
         super(JoomlaMigration, self)._migrate_data()
@@ -120,3 +132,12 @@ class UserMap(models.TransientModel):
     _inherit = 'joomla.migration.user.map'
 
     is_customer = fields.Boolean(help='True if the user is associated with sale order')
+
+
+class PlanMap(models.TransientModel):
+    _name = 'joomla.migration.erpmanger.plan.map'
+    _description = 'ERPManager Plan Map'
+
+    migration_id = fields.Many2one('joomla.migration', required=True)
+    joomla_plan_id = fields.Many2one('erpmanager.plan', required=True, ondelete='cascade')
+    odoo_product_id = fields.Many2one('product.product')
