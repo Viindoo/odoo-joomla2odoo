@@ -35,19 +35,22 @@ class JoomlaUser(models.TransientModel):
             groups_id=[(4, self.env.ref('base.group_portal').id)],
             login=self.username,
             email=self.email,
-            website_id=self.migration_id.to_website_id.id,
-            active=not self.block
+            website_id=self.migration_id.to_website_id.id
         )
         if self.language_id:
-            values.update(lang=self.language_id.code)
+            if self.language_id.active:
+                values.update(lang=self.language_id.code)
+            else:
+                lang = self.env.ref('base.lang_en')
+                if lang.active:
+                    values.update(lang=lang.code)
         return values
 
-    def _get_matching_data(self, odoo_model):
-        return {}
-
-    def _migrate(self, user_map):
+    def _migrate(self, user_map, existing_logins):
         self.ensure_one()
         values = self._prepare_odoo_user_values()
+        if self.username in existing_logins:
+            values['login'] = self.email
         partner = user_map.get(self)
         if partner:
             if partner.user_ids:
@@ -58,5 +61,6 @@ class JoomlaUser(models.TransientModel):
         return user.partner_id
 
     def migrate(self):
-        user_map = {r.joomla_user_id: r.odoo_partner_id for r in self.migration_id.user_map_ids}
-        super(JoomlaUser, self).migrate(user_map)
+        user_map = {r.joomla_user_id: r.odoo_partner_id for r in self._get_current_migration().user_map_ids}
+        existing_logins = set(self.env['res.users'].search([]).mapped('login'))
+        super(JoomlaUser, self).migrate(user_map, existing_logins)
