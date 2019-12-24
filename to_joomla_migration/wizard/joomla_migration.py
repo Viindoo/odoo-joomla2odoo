@@ -207,8 +207,10 @@ class JoomlaMigration(models.TransientModel):
     def migrate_data(self):
         self._logger.info('migrating data...')
         start = datetime.now()
-        self.with_context(active_test=False, joomla_migration=self)._migrate_data()
-        self.with_context(active_test=False)._post_migrate_data()
+        self = self.with_context(active_test=False)
+        self = self.with_context(joomla_migration=self)
+        self._migrate_data()
+        self._post_migrate_data()
         time = datetime.now() - start
         self._logger.info('migrated data ({}m, {}s)'.format(time.seconds // 60, time.seconds % 60))
 
