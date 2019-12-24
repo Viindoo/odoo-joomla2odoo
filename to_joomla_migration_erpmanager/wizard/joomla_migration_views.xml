@@ -1,33 +1,71 @@
 <odoo>
-    <record id="migration_form_inherit" model="ir.ui.view">
-        <field name="name">migration.form.inherit</field>
-        <field name="model">joomla.migration</field>
-        <field name="inherit_id" ref="to_joomla_migration.migration_form"/>
-        <field name="arch" type="xml">
-            <field name="include_easydiscuss" position="after">
-				<field name="include_erpmanager" string="ERPManager"/>
-            </field>
-            <notebook position="inside">
-                <page string="Odoo Plans" attrs="{'invisible': [('include_erpmanager', '=', False)]}">
-                    <field name="plan_map_ids">
-                        <tree editable="bottom">
-                            <field name="joomla_plan_id" />
-                            <field name="odoo_product_id" />
-                        </tree>
-                    </field>
-                </page>
-            </notebook>
-        </field>
-    </record>
+	<record id="migration_form_inherit" model="ir.ui.view">
+		<field name="name">migration.form.inherit</field>
+		<field name="model">joomla.migration</field>
+		<field name="inherit_id" ref="to_joomla_migration.migration_form" />
+		<field name="arch" type="xml">
+			<field name="include_easydiscuss" position="after">
+				<field name="include_erpmanager" string="ERPManager" />
+			</field>
+			<notebook position="inside">
+				<page string="Odoo Plans" attrs="{'invisible': [('include_erpmanager', '=', False)]}">
+					<field name="plan_map_ids">
+						<tree editable="bottom">
+							<field name="joomla_plan_id" />
+							<field name="odoo_product_id" />
+						</tree>
+					</field>
+				</page>
+				<page string="Sale Orders" attrs="{'invisible': [('include_erpmanager', '=', False)]}">
+					<group>
+						<field name="include_saleorder" />
+						<field name="pricelist_vnd_id" />
+						<field name="pricelist_usd_id" />
+					</group>
+					<div role="alert" class="alert alert-info">
+						Before continue:
+						<ul>
+							<li>Select default pricelist for saleorder.</li>
+							<li>Click <b>Sale Order Map</b> to view and update map data. Not mapped sale orders will be created.</li>
+						</ul>
+					</div>
+					<button name="action_view_saleorder_map" type="object" string="Sale Order Map" class="or_highlight" />
+				</page>
+			</notebook>
+		</field>
+	</record>
 
-    <record id="user_map_search" model="ir.ui.view">
-        <field name="name">joomla.migration.user.map.search.inherit.erpmanager</field>
-        <field name="model">joomla.migration.user.map</field>
-        <field name="inherit_id" ref="to_joomla_migration.user_map_search"/>
-        <field name="arch" type="xml">
-            <search>
-                <filter string="Customer" name="is_customer" domain="[('is_customer', '=', True)]"/>
-            </search>
-        </field>
-    </record>
+	<record id="user_map_search" model="ir.ui.view">
+		<field name="name">joomla.migration.user.map.search.inherit.erpmanager</field>
+		<field name="model">joomla.migration.user.map</field>
+		<field name="inherit_id" ref="to_joomla_migration.user_map_search" />
+		<field name="arch" type="xml">
+			<search>
+				<filter string="Customer" name="is_customer" domain="[('is_customer', '=', True)]" />
+			</search>
+		</field>
+	</record>
+
+	<record id="saleorder_map_tree" model="ir.ui.view">
+		<field name="name">joomla.migration.erpmanager.saleorder.map.tree</field>
+		<field name="model">joomla.migration.erpmanager.saleorder.map</field>
+		<field name="arch" type="xml">
+			<tree editable="bottom">
+				<field name="joomla_order_id" />
+				<field name="odoo_order_id" />
+			</tree>
+		</field>
+	</record>
+
+	<record id="saleorder_map_search" model="ir.ui.view">
+		<field name="name">joomla.migration.erpmanager.saleorder.map.search</field>
+		<field name="model">joomla.migration.erpmanager.saleorder.map</field>
+		<field name="arch" type="xml">
+			<search>
+				<field name="joomla_order_id" />
+				<field name="odoo_order_id" />
+			</search>
+		</field>
+	</record>
+
 </odoo>

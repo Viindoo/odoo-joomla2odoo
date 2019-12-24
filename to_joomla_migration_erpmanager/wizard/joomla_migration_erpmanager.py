@@ -1,4 +1,5 @@
 from odoo import models, fields
+from odoo.exceptions import UserError
 
 
 class JoomlaMigration(models.TransientModel):
@@ -32,7 +33,11 @@ class JoomlaMigration(models.TransientModel):
     instance_history_split_ids = fields.One2many('erpmanager.instance.history.split', 'migration_id')
     backup_ids = fields.One2many('erpmanager.backup', 'migration_id')
 
+    include_saleorder = fields.Boolean(string='Migrate Sale Orders', help='Set true to migrate sale order')
+    pricelist_vnd_id = fields.Many2one('product.pricelist', string='VND Pricelist', help='Default pricelist for VND sale order')
+    pricelist_usd_id = fields.Many2one('product.pricelist', string='USD Pricelist', help='Default pricelist for USD sale order')
     plan_map_ids = fields.One2many('joomla.migration.erpmanger.plan.map', 'migration_id')
+    saleorder_map_ids = fields.One2many('joomla.migration.erpmanager.saleorder.map', 'migration_id')
 
     def _get_joomla_models(self):
         jmodels = super(JoomlaMigration, self)._get_joomla_models()
@@ -48,6 +53,7 @@ class JoomlaMigration(models.TransientModel):
             if self.include_user:
                 self._update_user_map()
             self._init_plan_map()
+            self._init_saleorder_map()
         return res
 
     def _update_user_map(self):
@@ -85,6 +91,16 @@ class JoomlaMigration(models.TransientModel):
             res['context'] = context
         return res
 
+    def action_view_saleorder_map(self):
+        return dict(
+            name='Sale Order Map',
+            type='ir.actions.act_window',
+            res_model='joomla.migration.erpmanager.saleorder.map',
+            view_mode='tree',
+            targe='new',
+            domain='[("migration_id", "=", {})]'.format(self.id)
+        )
+
     def _init_plan_map(self):
         for plan in self.plan_ids.filtered(lambda p: not p.istrial):
             self.plan_map_ids.create(dict(
@@ -92,15 +108,26 @@ class JoomlaMigration(models.TransientModel):
                 joomla_plan_id=plan.id
             ))
 
+    def _init_saleorder_map(self):
+        for order in self.saleorder_ids:
+            self.saleorder_map_ids.create(dict(
+                migration_id=self.id,
+                joomla_order_id=order.id
+            ))
+
     def _migrate_data(self):
         super(JoomlaMigration, self)._migrate_data()
         if self.include_erpmanager:
+            if self.include_saleorder and (not self.pricelist_usd_id or not self.pricelist_vnd_id):
+                raise UserError('Please select default pricelist for sale order')
             self._migrate_erpmanager()
 
     def _migrate_erpmanager(self):
         self._disable_crons()
         self.wallet_ids.migrate()
         self.plan_ids.migrate()
+        if self.include_saleorder:
+            self.saleorder_ids.migrate()
         self.pserver_ids.migrate()
         self.ip_ids.migrate()
         self.proxyserver_ids.migrate()
@@ -141,3 +168,12 @@ class PlanMap(models.TransientModel):
     migration_id = fields.Many2one('joomla.migration', required=True)
     joomla_plan_id = fields.Many2one('erpmanager.plan', required=True, ondelete='cascade')
     odoo_product_id = fields.Many2one('product.product')
+
+
+class SaleOrderMap(models.TransientModel):
+    _name = 'joomla.migration.erpmanager.saleorder.map'
+    _description = 'ERPManager Sale Order Map'
+
+    migration_id = fields.Many2one('joomla.migration', required=True)
+    joomla_order_id = fields.Many2one('erpmanager.saleorder', required=True, ondelete='cascade')
+    odoo_order_id = fields.Many2one('sale.order')

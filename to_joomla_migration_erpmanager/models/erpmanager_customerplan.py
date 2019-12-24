@@ -18,6 +18,7 @@ class ERPManagerCustomerPlan(models.TransientModel):
         order_line = self.saleorder_id.order_line_ids.filtered(lambda line: line.plan_id == self.plan_id)
         assert order_line
         values = dict(
+            sale_order_line_id=order_line.odoo_id.id,
             partner_id=self.customer_id.odoo_id.id,
             plan_id=self.plan_id.odoo_id.id,
             instance_id=self.instance_id.odoo_id.id,

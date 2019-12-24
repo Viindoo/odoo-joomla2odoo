@@ -13,6 +13,7 @@ from . import odoo_version_config
 from . import odoo_vserver
 from . import odoo_wallet
 from . import product_product
+from . import sale_order
 from . import server_dns
 from . import server_ip_line
 from . import server_nginx
