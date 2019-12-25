@@ -15,7 +15,13 @@ class ERPManagerPlan(models.TransientModel):
     allow_custommodule = fields.Boolean(joomla_column=True)
     istrial = fields.Boolean(joomla_column=True)
     isaddon = fields.Boolean(joomla_column=True)
+    uom_id = fields.Many2one('uom.uom', compute='_compute_uom')
     odoo_id = fields.Many2one('product.product')
+
+    def _compute_uom(self):
+        month_uom = self.env['uom.uom'].search([('name', '=', 'Month')], limit=1)
+        for r in self:
+            r.uom_id = month_uom
 
     def _get_matching_data(self, odoo_model):
         data = super(ERPManagerPlan, self)._get_matching_data(odoo_model)
@@ -37,7 +43,9 @@ class ERPManagerPlan(models.TransientModel):
             max_uaccounts=self.max_uaccounts,
             max_backups=self.max_backup,
             max_storage=self.max_spacesize,
-            allow_custom_modules=self.allow_custommodule
+            allow_custom_modules=self.allow_custommodule,
+            uom_id=self.uom_id.id,
+            uom_po_id=self.uom_id.id
         )
         return values
 
