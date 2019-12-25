@@ -17,7 +17,7 @@ class ERPManagerBackup(models.TransientModel):
         values = dict(
             name=self.backup_path,
             odoo_version_id=self.erpversion_id.odoo_id.id,
-            instance_id=self.instance_id.odoo_id.id,
+            instanceperm_id=self.instance_id.odoo_id.instanceperm_id.id,
             backup_server_id=self._context.get('backup_server').id
         )
         values.update(self._prepare_track_values())
@@ -26,6 +26,8 @@ class ERPManagerBackup(models.TransientModel):
     def _migrate(self):
         self.ensure_one()
         values = self._prepare_backup_values()
+        if not values.get('instanceperm_id'):
+            return False
         backup = self.env['odoo.backup'].create(values)
         return backup
 

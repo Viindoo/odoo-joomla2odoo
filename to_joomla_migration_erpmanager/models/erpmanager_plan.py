@@ -18,7 +18,7 @@ class ERPManagerPlan(models.TransientModel):
     odoo_id = fields.Many2one('product.product')
 
     def _get_matching_data(self, odoo_model):
-        data = super(ERPManagerPlan, self)._get_matching_data()
+        data = super(ERPManagerPlan, self)._get_matching_data(odoo_model)
         migration = self._get_current_migration()
         for item in migration.plan_map_ids:
             if item.joomla_plan_id not in data and item.odoo_product_id:
