@@ -120,7 +120,7 @@ class JoomlaMigration(models.TransientModel):
         if self.include_erpmanager:
             if self.include_saleorder and (not self.pricelist_usd_id or not self.pricelist_vnd_id):
                 raise UserError('Please select default pricelist for sale order')
-            self._migrate_erpmanager()
+            self.with_context(tracking_disable=True)._migrate_erpmanager()
 
     def _migrate_erpmanager(self):
         self._disable_crons()
