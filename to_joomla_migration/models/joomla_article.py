@@ -141,7 +141,9 @@ class JoomlaArticle(models.TransientModel):
         values = dict(
             name=self.name,
             type='qweb',
-            arch_base=view_arch
+            arch_base=view_arch,
+            website_meta_keywords=self.metakey,
+            website_meta_description=self.metadesc,
         )
         return values
 
