@@ -119,14 +119,8 @@ class JoomlaArticle(models.TransientModel):
     def _prepare_website_page_view_values(self):
         self.ensure_one()
         content = self.introtext + self.fulltext
+        content = '<h1 class="mt-5 mb-5 text-center">{}</h1>{}'.format(self.name, content)
         content = self._migrate_html(content, to_xml=True)
-        if self.intro_image_url:
-            intro_image_url = self._migrate_image(self.intro_image_url)
-            content = """
-                <p>
-                    <img src="{}" class="center-block {}"/>
-                </p>
-            """.format(intro_image_url, self.responsive_img_class) + content
         view_arch = """
             <t t-name="website.{}">
                 <t t-call="website.layout">
