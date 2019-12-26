@@ -35,6 +35,7 @@ class JoomlaMigration(models.TransientModel):
             if url and (url.startswith('mailto:') or url.startswith('#')):
                 continue
             if url and self._is_internal_url(url):
+                url = self._make_sef_url(url)
                 url = re.sub(r'^https?://[^/]+', '', url)  # convert to relative url
                 if '%' in url:
                     url = urllib.parse.unquote(url)
@@ -49,6 +50,21 @@ class JoomlaMigration(models.TransientModel):
                     a.set('href', new_url)
                     self._logger.info('converted href from {} to {}'.format(url, new_url))
         return lxml.html.tostring(et, encoding='unicode', method=output_type)
+
+    def _make_sef_url(self, url):
+        com = urllib.parse.urlparse(url)
+        if com.path == 'index.php':
+            query_values = urllib.parse.parse_qs(com.query)
+            if query_values.get('option') == ['com_content'] and query_values.get('view') == ['article']:
+                id = query_values.get('id')
+                if id:
+                    id = id[0].split(':')
+                    if id and id[0].isdigit():
+                        id = int(id[0])
+                        article = self.article_ids.filtered(lambda a: a.joomla_id == id)[:1]
+                        if article:
+                            return article.sef_url
+        return url
 
     def _is_internal_url(self, url):
         url_com = urllib.parse.urlparse(url)
