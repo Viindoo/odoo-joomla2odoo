@@ -1,6 +1,7 @@
+import re
 import urllib.parse
 
-from odoo import models, fields
+from odoo import models, fields, api
 from odoo.http import request
 
 
@@ -52,7 +53,8 @@ class JoomlaMigration(models.TransientModel):
     def _add_url_map(self, from_url, to_url, redirect=True):
         if not from_url or not to_url:
             return None
-        to_url = urllib.parse.urljoin(self._get_website_url(), to_url)
+        if not re.match(r'https?://(wwww\.)?{}$'.format(self.to_website_id.domain), self.website_url):
+            to_url = urllib.parse.urljoin(self._get_website_url(), to_url)
         values = dict(
             migration_id=self.id,
             from_url=from_url,
