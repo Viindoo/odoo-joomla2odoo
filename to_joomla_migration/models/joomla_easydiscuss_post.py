@@ -122,7 +122,7 @@ class EasyDiscussPost(models.TransientModel):
         values = self._prepare_forum_post_values()
         user = self.user_id.odoo_id.user_ids[:1] or self._get_default_user()
         post = self.env(user=user.id)['forum.post'].with_context(mail_create_nolog=True).create(values)
-        self._add_url_map(post.sef_url, self.sef_url)
+        self._add_url_map(self.sef_url, post.sef_url)
         return post
 
     def post_migrate(self):

@@ -116,6 +116,6 @@ class EasyBlogPost(models.TransientModel):
         self.ensure_one()
         values = self._prepare_blog_post_values()
         post = self.env['blog.post'].create(values)
-        self._add_url_map(post.sef_url, self.sef_url, redirect=False)
-        self._add_url_map(post.sef_url, self.sef_url)
+        self._add_url_map(self.sef_url, post.sef_url, redirect=False)
+        self._add_url_map(self.sef_url, post.sef_url)
         return post
