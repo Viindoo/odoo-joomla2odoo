@@ -96,7 +96,7 @@ class EasyBlogPost(models.TransientModel):
         author = self.author_id.odoo_id or self._get_default_partner()
         content = self._prepare_blog_post_content(self.intro + self.content, self.intro_image_url)
         meta = self.meta_ids.filtered(lambda r: r.type == 'post')
-        tags = self.tag_ids.mapped('odoo_blog_tag_id')
+        tags = self.tag_ids.mapped('odoo_id')
         values.update(
             name=self.name,
             author_id=author.id,
