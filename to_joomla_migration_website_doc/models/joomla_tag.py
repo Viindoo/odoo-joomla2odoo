@@ -12,10 +12,8 @@ class JoomlaTag(models.TransientModel):
         values.update(name=self.name)
         return values
 
-    def _migrate_to_website_doc_tag(self, matching_record):
+    def _migrate_to_website_doc_tag(self):
         self.ensure_one()
-        if matching_record:
-            return matching_record
         values = self._prepare_website_doc_tag_values()
         tag = self.env['website.doc.tag'].create(values)
         return tag

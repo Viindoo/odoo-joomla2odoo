@@ -145,10 +145,8 @@ class JoomlaArticle(models.TransientModel):
         )
         return values
 
-    def _migrate_to_website_page(self, matching_record):
+    def _migrate_to_website_page(self):
         self.ensure_one()
-        if matching_record:
-            return matching_record
         values = self._prepare_website_page_values()
         page = self.env['website.page'].create(values)
         self._add_url_map(page.sef_url, self.sef_url)
@@ -177,10 +175,8 @@ class JoomlaArticle(models.TransientModel):
         )
         return values
 
-    def _migrate_to_blog_post(self, matching_record):
+    def _migrate_to_blog_post(self):
         self.ensure_one()
-        if matching_record:
-            return matching_record
         values = self._prepare_blog_post_values()
         post = self.env['blog.post'].create(values)
         self._add_url_map(post.sef_url, self.sef_url)

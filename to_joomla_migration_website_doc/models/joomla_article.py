@@ -28,10 +28,8 @@ class JoomlaArticle(models.TransientModel):
         )
         return values
 
-    def _migrate_to_website_doc(self, matching_record, doc_category, sequence=None):
+    def _migrate_to_website_doc(self, doc_category, sequence=None):
         self.ensure_one()
-        if matching_record:
-            return matching_record
         doc_values = self._prepare_website_doc_values()
         doc_values.update(category_id=doc_category.id)
         if sequence:
