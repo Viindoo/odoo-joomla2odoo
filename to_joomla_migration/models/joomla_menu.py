@@ -32,8 +32,8 @@ class JoomlaMenu(models.TransientModel):
             jid = int(query.get('id', False))
             if option == 'com_content' and jid:
                 if view == 'article':
-                    menu.article = self.env['joomla.article'].search([('joomla_id', '=', jid)], limit=1)
+                    menu.article_id = self.env['joomla.article'].search([('joomla_id', '=', jid)], limit=1)
                 elif view in ['category', 'categories']:
-                    menu.category = self.env['joomla.category'].search([('joomla_id', '=', jid)], limit=1)
+                    menu.category_id = self.env['joomla.category'].search([('joomla_id', '=', jid)], limit=1)
             elif option == 'com_easyblog' and view == 'latest':
                 menu.easyblog = True
