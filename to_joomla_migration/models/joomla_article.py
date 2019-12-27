@@ -110,7 +110,6 @@ class JoomlaArticle(models.TransientModel):
             view_id=view.id,
             website_published=self.state == 1,
             website_id=self.migration_id.to_website_id.id,
-            website_ids=[(4, self.migration_id.to_website_id.id)],
             active=self.state == 0 or self.state == 1,
             language_id=self.language_id.id
         )
