@@ -130,5 +130,5 @@ class EasyDiscussPost(models.TransientModel):
             self._logger.info('[{}/{}] updating log access for forum post {}'.format(idx, len(self), post.alias))
             if post.odoo_id:
                 sql = "UPDATE forum_post SET create_date = %s, write_date = %s, write_uid = %s WHERE id = %s"
-                self._cr.execute(sql, (post.created, post.modified_date, post.user_id.odoo_id.id, post.odoo_id.id))
+                self._cr.execute(sql, (post.created, post.modified_date, post.user_id.odoo_id.user_ids[:1].id, post.odoo_id.id))
                 self._cr.commit()

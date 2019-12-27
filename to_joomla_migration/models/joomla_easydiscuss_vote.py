@@ -17,7 +17,7 @@ class EasyDiscussVote(models.TransientModel):
         values = self._prepare_track_values()
         values.update(
             post_id=self.post_id.odoo_id.id,
-            user_id=self.user_id.odoo_id.id or SUPERUSER_ID,
+            user_id=self.user_id.odoo_id.user_ids[:1].id or SUPERUSER_ID,
             vote=str(self.value),
             forum_id=self.migration_id.to_forum_id.id
         )
