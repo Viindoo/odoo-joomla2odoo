@@ -6,7 +6,6 @@ class JoomlaMigration(models.TransientModel):
     _inherit = 'joomla.migration'
 
     include_erpmanager = fields.Boolean()
-    db_table_prefix = fields.Char(default='lgzds_')
 
     partner_ids = fields.One2many('erpmanager.partner', 'migration_id')
     saleorder_ids = fields.One2many('erpmanager.saleorder', 'migration_id')
