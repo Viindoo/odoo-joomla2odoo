@@ -17,16 +17,6 @@ class JoomlaMigration(models.TransientModel):
             self._create_redirects()
 
     def _create_redirects(self):
-        Website = self.env['website']
-        from_domain = urllib.parse.urlparse(self.website_url).hostname
-        from_website = Website.search([('domain', '=', from_domain)], limit=1)
-        if not from_website:
-            values = {
-                'name': from_domain,
-                'domain': from_domain
-            }
-            from_website = Website.create(values)
-
         Redirect = self.env['website.redirect']
         from_urls = set(Redirect.search([]).mapped('url_from'))
         for item in self.url_map_ids:
@@ -36,7 +26,7 @@ class JoomlaMigration(models.TransientModel):
                 'type': '301',
                 'url_from': item.from_url,
                 'url_to': item.to_url,
-                'website_id': from_website.id,
+                'website_id': self.to_website_id.id,
                 'migration_id': self.id,
                 'old_website': self.website_url
             }
