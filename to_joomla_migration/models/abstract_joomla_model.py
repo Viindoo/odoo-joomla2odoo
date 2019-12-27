@@ -65,14 +65,17 @@ class AbstractJoomlaModel(models.AbstractModel):
         lang = self.env['res.lang']
         if code:
             lang_id = self._get_lang_id_from_code(code)
+            if not lang_id:
+                lang_id = self._get_lang_id_from_code(code, False)
             lang = lang.browse(lang_id)
         return lang
 
-    @ormcache('code')
-    def _get_lang_id_from_code(self, code):
+    @ormcache('code', 'active_only')
+    def _get_lang_id_from_code(self, code, active_only=True):
         lang = self.env['res.lang']
         code = code.replace('-', '_')
-        all_langs = lang.search([])
+        domain = [('active', '=', True)] if active_only else []
+        all_langs = lang.search(domain)
         exact_matches = all_langs.filtered(lambda r: r.code == code)
         if exact_matches:
             lang = exact_matches[0]
