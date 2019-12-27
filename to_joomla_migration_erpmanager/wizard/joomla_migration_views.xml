@@ -68,4 +68,24 @@
 		</field>
 	</record>
 
+	<record id="saleorder_form" model="ir.ui.view">
+		<field name="name">saleorder.form</field>
+		<field name="model">erpmanager.saleorder</field>
+		<field name="arch" type="xml">
+			<form>
+				<group>
+					<field name="name" readonly="1" />
+					<field name="customer_id" readonly="1" />
+					<field name="currency_id" readonly="1" />
+				</group>
+				<field name="order_line_ids" readonly="1">
+					<tree>
+						<field name="plan_id" />
+						<field name="unitprice" />
+						<field name="quantity" />
+					</tree>
+				</field>
+			</form>
+		</field>
+	</record>
 </odoo>

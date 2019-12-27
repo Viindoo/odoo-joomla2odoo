@@ -7,6 +7,7 @@ class ERPManagerPartner(models.TransientModel):
     _description = 'ERPManager Partner'
     _joomla_table = 'erpmanager_partner'
 
+    name = fields.Char(related='uid.name', joomla_column=False)
     uid = fields.Many2one('joomla.user', joomla_column=True)
     company_name = fields.Char(joomla_column=True)
     odoo_id = fields.Many2one('res.partner', related='uid.odoo_id')
