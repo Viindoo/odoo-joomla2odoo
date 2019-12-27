@@ -40,7 +40,7 @@ class EasyDiscussPost(models.TransientModel):
     def _compute_sef_url(self):
         for post in self:
             if post.language_id:
-                post.sef_url = '{}/discussions/{}-{}'.format(post.language_id.code[:2], post.joomla_id, post.alias)
+                post.sef_url = '/{}/discussions/{}-{}'.format(post.language_id.code[:2], post.joomla_id, post.alias)
             else:
                 post.sef_url = False
 
