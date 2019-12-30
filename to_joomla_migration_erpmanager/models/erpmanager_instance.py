@@ -95,7 +95,8 @@ class ERPManagerInstance(models.TransientModel):
             db_password=self.db_password,
             admin_password=self.admin_passwd,
             http_port_id=self.http_port_id.odoo_id.id,
-            longpolling_port_id=self.longpolling_port_id.odoo_id.id
+            longpolling_port_id=self.longpolling_port_id.odoo_id.id,
+            is_running=self.published
         )
         values.update(self._prepare_track_values())
         return values
