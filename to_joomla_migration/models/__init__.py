@@ -2,6 +2,7 @@ from . import blog_post
 from . import forum_post
 from . import ir_attachment
 from . import res_users
+from . import website_forum
 from . import website_page
 from . import abstract_joomla_model
 from . import abstract_joomla_content

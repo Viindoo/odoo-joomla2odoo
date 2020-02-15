@@ -15,18 +15,3 @@ class JoomlaCategory(models.TransientModel):
     menu_ids = fields.One2many('joomla.menu', 'category_id')
     extension = fields.Char(joomla_column=True)
     article_ids = fields.One2many('joomla.article', 'category_id')
-    articles_count = fields.Integer(compute='_compute_articles_count')
-
-    @api.depends('article_ids')
-    def _compute_articles_count(self):
-        for r in self:
-            r.articles_count = len(r.article_ids)
-
-    def name_get(self):
-        result = []
-        for r in self:
-            if r.articles_count:
-                result.append((r.id, '{} ({} Articles)'.format(r.name, r.articles_count)))
-            else:
-                result.append((r.id, r.name))
-        return result

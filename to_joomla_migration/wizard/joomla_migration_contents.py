@@ -29,9 +29,9 @@ class JoomlaMigration(models.TransientModel):
 
     def _update_href_in_content(self, content, output_type='html'):
         et = lxml.html.fromstring(content)
-        a_tags = et.findall('.//a')
-        for a in a_tags:
-            url = a.get('href')
+        tags = et.findall('.//a')
+        for tag in tags:
+            url = tag.get('href')
             if url and (url.startswith('mailto:') or url.startswith('#')):
                 continue
             if url and self._is_internal_url(url):
@@ -41,14 +41,13 @@ class JoomlaMigration(models.TransientModel):
                     url = urllib.parse.unquote(url)
                 if not url.startswith('/'):
                     url = '/' + url
-                url_map = self._get_url_map(url)
-                if not url_map:
-                    a.drop_tag()
-                    self._logger.info('dropped href {}'.format(url))
-                else:
-                    new_url = url_map.to_url
-                    a.set('href', new_url)
+                new_url = self._get_to_url(url)
+                if new_url:
+                    tag.set('href', new_url)
                     self._logger.info('converted href from {} to {}'.format(url, new_url))
+                else:
+                    del tag.attrib['href']
+                    self._logger.info('drop href {}'.format(url))
         return lxml.html.tostring(et, encoding='unicode', method=output_type)
 
     def _make_sef_url(self, url):

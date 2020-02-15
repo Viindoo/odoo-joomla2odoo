@@ -20,7 +20,7 @@ Provide tracking information on forum data that have been migrated from other we
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['to_migration_track_website', 'website_forum'],
+    'depends': ['to_migration_track', 'website_forum'],
     # always loaded
     'data': [
     ],

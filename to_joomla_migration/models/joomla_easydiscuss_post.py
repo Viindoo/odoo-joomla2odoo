@@ -1,4 +1,6 @@
 import bbcode
+import json
+import urllib.parse
 
 from odoo import models, fields, api
 
@@ -16,6 +18,7 @@ class EasyDiscussPost(models.TransientModel):
     modified_date = fields.Datetime(joomla_column='modified')
     content = fields.Text(joomla_column=True)
     content_type = fields.Char(joomla_column=True)
+    params = fields.Text(joomla_column=True)
     language = fields.Char(joomla_column=True, string='Language Code')
     language_id = fields.Many2one('res.lang', compute='_compute_language')
     hits = fields.Integer(joomla_column=True)
@@ -72,14 +75,44 @@ class EasyDiscussPost(models.TransientModel):
             html = parser.format(content)
         else:
             html = self.content
+        refs = self._get_refs()
+        for ref in refs:
+            html += '<p><a href="{0}">{0}</a></p>'.format(ref)
         return html
+
+    def _get_refs(self):
+        self.ensure_one()
+        refs = []
+        if not self.params:
+            return refs
+        if self.params.startswith('{'):
+            try:
+                params = json.loads(self.params)
+            except:
+                self._logger.error('Can not decode json value: {}'.format(self.params))
+                return refs
+        else:
+            params = {}
+            lines = self.params.splitlines()
+            for line in lines:
+                splits = line.split('=', maxsplit=1)
+                if len(splits) == 2:
+                    k, v = splits
+                    if v.startswith('"'):
+                        v = v[1:-1]
+                    params[k] = v
+        for key in params:
+            if key.startswith('params_references'):
+                ref = urllib.parse.unquote(params[key])
+                refs.append(ref)
+        return refs
 
     def _create_image_block(self, url, title):
         return """
             <p>
                 <img class="{}" src="{}" title="{}"
             </p>
-        """.format(self.responsive_img_class, url, title)
+        """.format(self._get_img_class(), url, title)
 
     def _create_attachment_block(self, url, title):
         return """
@@ -107,12 +140,18 @@ class EasyDiscussPost(models.TransientModel):
             return self._create_image_block(url, '')
         return ''
 
+    def _bbcode_render_code(self, tag_name, value, options, parent, context):
+        type = options.get('type')
+        if type:
+            return '<pre class="language-{}">{}</pre>'.format(type, value)
+        return '<pre>{}</pre>'.format(value)
+
     def _get_bbcode_parser(self):
         self.ensure_one()
         parser = bbcode.Parser(replace_links=False)
         parser.add_formatter('img', self._bbcode_render_img)
         parser.add_formatter('attachment', self._bbcode_render_attachment)
-        parser.add_simple_formatter('code', '<pre>%(value)s</pre>', transform_newlines=False)
+        parser.add_formatter('code', self._bbcode_render_code, transform_newlines=False)
         # TODO: add formatters for some video sites such as youtube,...
         parser.add_simple_formatter('video', ' %(value)s ')
         return parser

@@ -21,7 +21,7 @@ Provide tracking information on blog data that have been migrated from other web
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['to_migration_track_website', 'to_website_content_language_blog'],
+    'depends': ['to_migration_track', 'website_blog'],
     # always loaded
     'data': [
     ],

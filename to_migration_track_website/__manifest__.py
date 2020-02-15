@@ -22,7 +22,7 @@ Provide tracking information for data that have been migrated from other website
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['to_migration_track', 'to_website_content_language'],
+    'depends': ['to_migration_track', 'website'],
 
     # always loaded
     'data': [

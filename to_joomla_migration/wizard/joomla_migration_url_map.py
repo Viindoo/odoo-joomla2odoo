@@ -1,7 +1,6 @@
-import re
 import urllib.parse
 
-from odoo import models, fields, api
+from odoo import models, fields
 from odoo.http import request
 
 
@@ -17,6 +16,7 @@ class JoomlaMigration(models.TransientModel):
             self._create_redirects()
 
     def _create_redirects(self):
+        self.ensure_one()
         Redirect = self.env['website.redirect']
         from_urls = set(Redirect.search([]).mapped('url_from'))
         for item in self.url_map_ids:
@@ -32,19 +32,30 @@ class JoomlaMigration(models.TransientModel):
             }
             Redirect.create(values)
 
-    def _get_website_url(self):
-        request_url = request.httprequest.url_root
-        request_url_components = urllib.parse.urlparse(request_url)
-        url = '{}://{}'.format(request_url_components.scheme, self.to_website_id.domain)
-        if request_url_components.port:
-            url += ':{}'.format(request_url_components.port)
+    def _get_to_website_url(self):
+        domain = self.to_website_id.domain
+        if not domain:
+            return None
+        components = urllib.parse.urlparse(domain)
+        if components.scheme:
+            return domain
+        components = urllib.parse.urlparse(request.httprequest.url_root)
+        url = '{}://{}'.format(components.scheme, domain)
+        if components.port:
+            url += ':{}'.format(components.port)
         return url
 
+    def _process_to_url_for_map(self, to_url):
+        to_website_url = self._get_to_website_url()
+        if to_website_url and to_website_url != self.website_url:
+            to_url = urllib.parse.urljoin(to_website_url, to_url)
+        return to_url
+
     def _add_url_map(self, from_url, to_url, redirect=True):
+        self.ensure_one()
         if not from_url or not to_url:
             return None
-        if not re.match(r'https?://(wwww\.)?{}$'.format(self.to_website_id.domain), self.website_url):
-            to_url = urllib.parse.urljoin(self._get_website_url(), to_url)
+        to_url = self._process_to_url_for_map(to_url)
         values = dict(
             migration_id=self.id,
             from_url=from_url,
@@ -53,8 +64,8 @@ class JoomlaMigration(models.TransientModel):
         )
         return self.env['joomla.migration.url.map'].create(values)
 
-    def _get_url_map(self, from_url):
-        return self.env['joomla.migration.url.map'].search([('from_url', '=', from_url)], limit=1)
+    def _get_to_url(self, from_url):
+        return self.env['joomla.migration.url.map'].search([('from_url', '=', from_url)], limit=1).to_url
 
 
 class JoomlaMigrationUrlMap(models.TransientModel):

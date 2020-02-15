@@ -100,13 +100,11 @@ class JoomlaArticle(models.TransientModel):
     def _prepare_website_page_values(self):
         self.ensure_one()
         values = self._prepare_track_values()
-        category_path = slugify(self.category_id.path, path=True)
-        url = '/' + category_path + '/' + slugify(self.alias)
         view_values = self._prepare_website_page_view_values()
         view = self.env['ir.ui.view'].create(view_values)
         values.update(
             name=self.name,
-            url=url,
+            url=self._get_page_url(),
             view_id=view.id,
             website_published=self.state == 1,
             website_id=self.migration_id.to_website_id.id,
@@ -114,6 +112,12 @@ class JoomlaArticle(models.TransientModel):
             language_id=self.language_id.id
         )
         return values
+
+    def _get_page_url(self):
+        self.ensure_one()
+        category_path = slugify(self.category_id.path, path=True)
+        url = '/' + category_path + '/' + slugify(self.alias)
+        return url
 
     def _prepare_website_page_view_values(self):
         self.ensure_one()

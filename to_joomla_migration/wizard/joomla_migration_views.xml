@@ -94,7 +94,6 @@
         <field name="model">joomla.migration.user.map</field>
         <field name="arch" type="xml">
             <tree editable="top">
-                <field name="joomla_user_idx"/>
                 <field name="joomla_user_id" options="{'no_create_edit': True}"/>
                 <field name="odoo_partner_idx"/>
                 <field name="odoo_partner_id"/>
@@ -109,6 +108,7 @@
             <search>
                 <field name="joomla_user_id"/>
                 <field name="odoo_partner_id"/>
+                <filter string="Not Mapped" name="not_mapped" domain="[('odoo_partner_id', '=', False)]" />
             </search>
         </field>
     </record>

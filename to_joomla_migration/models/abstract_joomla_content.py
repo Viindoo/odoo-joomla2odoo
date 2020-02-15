@@ -11,19 +11,10 @@ _logger = logging.getLogger(__name__)
 def _get_bootstrap_version():
     odoo_version = release.version_info[0]
     if odoo_version == 12:
-        return 4
+        return '4'
     elif odoo_version == 11:
-        return 3
+        return '3'
     return None
-
-
-def _get_responsive_img_class():
-    version = _get_bootstrap_version()
-    if version == 4:
-        return 'img-fluid'
-    elif version == 3:
-        return 'img-responsive'
-    return ''
 
 
 class AbstractJoomlaContent(models.AbstractModel):
@@ -31,7 +22,14 @@ class AbstractJoomlaContent(models.AbstractModel):
     _inherit = 'abstract.joomla.model'
     _description = 'Abstract Joomla Content'
 
-    responsive_img_class = _get_responsive_img_class()
+    bootstrap_verion = _get_bootstrap_version()
+
+    def _get_img_class(self):
+        if self.bootstrap_verion == '4':
+            return 'img-fluid img-thumbnail'
+        elif self.bootstrap_verion == '3':
+            return 'img-responsive img-thumbnail'
+        return ''
 
     def _migrate_image(self, image_url):
         self.ensure_one()
@@ -50,13 +48,6 @@ class AbstractJoomlaContent(models.AbstractModel):
         return lxml.html.tostring(html_doc, encoding='unicode', method=output_type)
 
     def _sanitize_html(self, html):
-        html = html.replace('lang:php=""', '') \
-            .replace('lang:php=', '') \
-            .replace('lang:php', '') \
-            .replace('xml:lang="css"', '') \
-            .replace('xml:lang="php"', '') \
-            .replace('xml:lang="xml"', '') \
-            .replace('xml:lang="python"', '')
         html = html_sanitize(html)
         return html
 
@@ -71,8 +62,9 @@ class AbstractJoomlaContent(models.AbstractModel):
                 new_url = self._migrate_image(url)
                 if new_url:
                     img.set('src', new_url)
-                    if self.responsive_img_class:
-                        img.classes.add(self.responsive_img_class)
+                    img_class = self._get_img_class()
+                    if self._get_img_class():
+                        img.set('class', self._get_img_class())
 
     def _prepare_blog_post_content(self, content, intro_image_url=None):
         content = self._migrate_html(content)
@@ -81,9 +73,9 @@ class AbstractJoomlaContent(models.AbstractModel):
         if intro_image_url:
             content = """
                 <p>
-                    <img src="{}" class="center-block {}"/>
+                    <img src="{}" class="d-block mx-auto {}"/>
                 </p>
-            """.format(intro_image_url, self.responsive_img_class) + content
+            """.format(intro_image_url, self._get_img_class()) + content
         content = """
             <section class="s_text_block">
                 <div class="container">

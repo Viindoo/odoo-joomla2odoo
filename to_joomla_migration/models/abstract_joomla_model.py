@@ -162,3 +162,13 @@ class AbstractJoomlaModel(models.AbstractModel):
                 result = getattr(record, meth)(*args, **kwargs)
             record[result_field] = result
             self._cr.commit()
+
+    def name_get(self):
+        res = super(AbstractJoomlaModel, self).name_get()
+        if not self._fields.get('joomla_id'):
+            return res
+        new_res = []
+        for id, name in res:
+            jid = self.browse(id).joomla_id
+            new_res.append((id, name + ' (JID={})'.format(jid)))
+        return new_res

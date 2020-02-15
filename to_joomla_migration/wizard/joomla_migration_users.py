@@ -18,7 +18,8 @@ class JoomlaMigration(models.TransientModel):
             res_model='joomla.migration.user.map',
             view_mode='tree',
             targe='new',
-            domain='[("migration_id", "=", {})]'.format(self.id)
+            domain='[("migration_id", "=", {})]'.format(self.id),
+            context=dict(search_default_not_mapped=1)
         )
 
     def _get_joomla_models(self):
@@ -45,9 +46,13 @@ class JoomlaMigration(models.TransientModel):
         user_map = {}
         email_to_partners = self._get_email_to_partners_map()
         for juser in self.joomla_user_ids:
-            partners = email_to_partners.get(juser.email)
-            if partners:
-                user_map[juser] = partners[0]
+            if juser.email:
+                email = juser.email.strip().lower()
+                partners = email_to_partners.get(email)
+                if partners:
+                    user_map[juser] = partners[0]
+                else:
+                    user_map[juser] = self.env['res.partner']
         return user_map
 
     def _get_email_to_partners_map(self):
@@ -55,10 +60,11 @@ class JoomlaMigration(models.TransientModel):
         email_to_partners = defaultdict(list)
         for partner in partners:
             if partner.email:
+                email = partner.email.strip().lower()
                 if partner.is_company:
-                    email_to_partners[partner.email].insert(0, partner)
+                    email_to_partners[email].insert(0, partner)
                 else:
-                    email_to_partners[partner.email].append(partner)
+                    email_to_partners[email].append(partner)
         return email_to_partners
 
     def _migrate_data(self):
@@ -73,6 +79,5 @@ class UserMap(models.TransientModel):
 
     migration_id = fields.Many2one('joomla.migration', ondelete='cascade', required=True)
     joomla_user_id = fields.Many2one('joomla.user', ondelete='cascade', required=True)
-    joomla_user_idx = fields.Integer(related='joomla_user_id.joomla_id', string='Joomla User ID')
     odoo_partner_id = fields.Many2one('res.partner', ondelete='cascade')
     odoo_partner_idx = fields.Integer(related='odoo_partner_id.id', string='Odoo Partner ID')

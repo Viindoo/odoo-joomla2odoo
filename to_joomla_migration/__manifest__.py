@@ -49,6 +49,10 @@ Eddition Support
     'version': '0.1',
     'depends': [
         'auth_signup',
+        'to_website_language_page',
+        'to_website_language_blog',
+        'to_website_language_forum',
+        'to_migration_track_website',
         'to_migration_track_website_blog',
         'to_migration_track_website_forum'
     ],

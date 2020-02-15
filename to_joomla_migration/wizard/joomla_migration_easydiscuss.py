@@ -25,22 +25,9 @@ class JoomlaMigration(models.TransientModel):
             self._migrate_easydiscuss()
 
     def _migrate_easydiscuss(self):
-        # Change forum karma temporarily to bypass karma restriction
-        self.to_forum_id.karma_tag_create -= 1000000
-        self.to_forum_id.karma_ask -= 1000000
-        self.to_forum_id.karma_answer -= 1000000
-        self.to_forum_id.karma_editor -= 1000000
-        self.to_forum_id.karma_post -= 1000000
-        try:
-            self.easydiscuss_tag_ids.migrate()
-            self.easydiscuss_attachment_ids.migrate()
-            self.easydiscuss_post_ids.migrate()
-            self.easydiscuss_vote_ids.migrate()
-            self.easydicuss_comment_ids.migrate()
-            self.easydiscuss_post_ids.post_migrate()
-        finally:
-            self.to_forum_id.karma_tag_create += 1000000
-            self.to_forum_id.karma_ask += 1000000
-            self.to_forum_id.karma_answer += 1000000
-            self.to_forum_id.karma_editor += 1000000
-            self.to_forum_id.karma_post += 1000000
+        self.easydiscuss_tag_ids.migrate()
+        self.easydiscuss_attachment_ids.migrate()
+        self.easydiscuss_post_ids.migrate()
+        self.easydiscuss_vote_ids.migrate()
+        self.easydicuss_comment_ids.migrate()
+        self.easydiscuss_post_ids.post_migrate()

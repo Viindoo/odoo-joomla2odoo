@@ -33,9 +33,9 @@ class JoomlaMigration(models.TransientModel):
     db_name = fields.Char(required=True)
     db_table_prefix = fields.Char()
 
-    to_website_id = fields.Many2one('website', default=_default_to_website, required=True)
-    to_blog_id = fields.Many2one('blog.blog', default=_default_to_blog, required=True)
-    to_forum_id = fields.Many2one('forum.forum', default=_default_to_forum, required=True)
+    to_website_id = fields.Many2one('website', default=lambda self: self._default_to_website(), required=True)
+    to_blog_id = fields.Many2one('blog.blog', default=lambda self: self._default_to_blog(), required=True)
+    to_forum_id = fields.Many2one('forum.forum', default=lambda self: self._default_to_forum(), required=True)
 
     state = fields.Selection([('setup', 'Setup'), ('migrating', 'Migrating')], default='setup')
     migrating_info = fields.Text()
