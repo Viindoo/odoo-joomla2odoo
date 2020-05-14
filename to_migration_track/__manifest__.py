@@ -11,7 +11,7 @@ Provide tracking information for data that have been migrated from other website
 
     'author': "T.V.T Marine Automation (aka TVTMA)",
     'website': 'https://ma.tvtmarine.com',
-    'live_test_url': 'https://v11demo-joomla.erponline.vn',
+    'live_test_url': 'https://v12demo-joomla.erponline.vn',
     'support': 'support@ma.tvtmarine.com',
 
     # Categories can be used to filter modules in modules listing

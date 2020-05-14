@@ -16,9 +16,9 @@ Restrict Blog Posts from display on unsupported language website
     """,
 
     'author': "T.V.T Marine Automation (aka TVTMA)",
-    'website': "https://www.tvtmarine.com",
-    'live_test_url': "https://v12demo-int.erponline.vn",
-    'support': "support@ma.tvtmarine.com",
+    'website': 'https://ma.tvtmarine.com',
+    'live_test_url': 'https://v12demo-joomla.erponline.vn',
+    'support': 'support@ma.tvtmarine.com',
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml

@@ -43,7 +43,7 @@ Eddition Support
     """,
     'author': "T.V.T Marine Automation (aka TVTMA)",
     'website': 'https://ma.tvtmarine.com',
-    'live_test_url': 'https://v11demo-joomla.erponline.vn',
+    'live_test_url': 'https://v12demo-joomla.erponline.vn',
     'support': 'support@ma.tvtmarine.com',
     'category': 'Extra Tools',
     'version': '0.1',
