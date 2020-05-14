@@ -1,0 +1,23 @@
+<odoo>
+    <record id="view_forum_forum_form_inherit" model="ir.ui.view">
+        <field name="name">forum.forum.form</field>
+        <field name="model">forum.forum</field>
+        <field name="inherit_id" ref="website_forum.view_forum_forum_form"/>
+        <field name="arch" type="xml">
+            <field name="website_id" position="after">
+                <field name="language_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_forum_forum_list_inherit" model="ir.ui.view">
+        <field name="name">forum.forum.list</field>
+        <field name="model">forum.forum</field>
+        <field name="inherit_id" ref="website_forum.view_forum_forum_list"/>
+        <field name="arch" type="xml">
+            <field name="website_id" position="after">
+                <field name="language_id"/>
+            </field>
+        </field>
+    </record>
+</odoo>
