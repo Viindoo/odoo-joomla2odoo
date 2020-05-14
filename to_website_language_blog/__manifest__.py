@@ -37,5 +37,6 @@ Restrict Blog Posts from display on unsupported language website
     'application': False,
     'auto_install': False,
     'license': 'OPL-1',
+    'price': 45.9,
 }
 
