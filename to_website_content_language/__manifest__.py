@@ -18,7 +18,7 @@ Filter website pages by language
     'installable': True,
     'application': False,
     'auto_install': False,
-    'price': 0.0,
+    'price': 45.9,
     'currency': 'EUR',
     'license': 'OPL-1',
 }

@@ -29,7 +29,7 @@ Provide tracking information for data that have been migrated from other website
     'installable': True,
     'application': False,
     'auto_install': False,
-    'price': 0.0,
+    'price': 9.9,
     'currency': 'EUR',
     'license': 'OPL-1',
 }

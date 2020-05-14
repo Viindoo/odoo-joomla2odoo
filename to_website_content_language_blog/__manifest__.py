@@ -26,7 +26,7 @@ Restrict Blog Posts from display on unsupported language website
     'installable': True,
     'application': False,
     'auto_install': True,
-    'price': 0.0,
+    'price': 45.9,
     'currency': 'EUR',
     'license': 'OPL-1',
 }
