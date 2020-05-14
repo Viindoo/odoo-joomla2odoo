@@ -13,6 +13,7 @@ The migration Scope
 1. Joomla Users -> Odoo Users
 2. Joomla Articles (aka com_content) -> Odoo Website Pages
 3. Joomla EasyBlog -> Odoo Blog
+4. Joomla EasyDiscuss -> Odoo Forum
 
 Before migration, the administrator can
 
@@ -29,11 +30,15 @@ Joomla Database Supported
 
 External Dependencies
 ---------------------
-Python: mysql-connector-python which can be installed on your Odoo server by firing command
+Python: mysql-connector-python, bbcode which can be installed on your Odoo server by firing command
 
     .. code:: python
       
       pip install mysql-connector-python
+
+    .. code:: python
+    
+      pip install bbcode
 
 Eddition Support
 ================
