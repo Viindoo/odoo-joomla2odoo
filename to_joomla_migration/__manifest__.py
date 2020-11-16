@@ -67,7 +67,7 @@ Eddition Support
         'wizard/joomla_migration_views.xml'
     ],
     'images' : ['static/description/main_screenshot.png'],
-    'installable': True,
+    'installable': False,
     'application': True,
     'auto_install': False,
     'price': 495.0,

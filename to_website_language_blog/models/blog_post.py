@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 from odoo import api, fields, models
+from odoo.osv import expression
 
 class BlogPost(models.Model):
     _inherit = 'blog.post'
@@ -13,12 +13,13 @@ class BlogPost(models.Model):
 
     def _update_domain(self, domain):
         if self.env.context.get('blog_filter_by_language', False):
-            language_code = self.env.context.get('lang')
-            domain += [
+            language_code = self.env.context.get('lang', '')
+            lang_domain = [
                 '|',
                 ('language_id', '=', False),
                 ('language_id.code', '=', language_code)
             ]
+            domain = expression.AND([domain, lang_domain])
         return domain
 
     @api.model

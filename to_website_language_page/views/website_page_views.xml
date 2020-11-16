@@ -7,6 +7,10 @@
             <field name="date_publish" position="after">
                 <field name="language_id"/>
             </field>
+            <field name="menu_ids" position="after">
+           		<label for="other_language_page_ids" string="Other Language Pages"/>
+             	<field name="other_language_page_ids"/>
+            </field>
         </field>
     </record>
 
@@ -15,7 +19,7 @@
         <field name="model">website.page</field>
         <field name="inherit_id" ref="website.website_pages_tree_view"/>
         <field name="arch" type="xml">
-            <field name="website_published" position="after">
+            <field name="website_id" position="after">
                 <field name="language_id"/>
             </field>
         </field>
