@@ -2,8 +2,6 @@ from odoo import models
 from odoo import http
 from odoo.http import request
 from odoo.tools.misc import frozendict
-import os
-from odoo.addons.http_routing.models.ir_http import ModelConverter, _guess_mimetype
 
 class Http(models.AbstractModel):
     _inherit = 'ir.http'
@@ -21,7 +19,7 @@ class Http(models.AbstractModel):
             page_domain = [('url', '=', req_page)] + request.website.website_domain()
             page = request.env['website.page'].sudo().search(page_domain, order='website_id asc', limit=1)
             pages = page.other_language_page_ids.filtered(lambda p: p.language_id.code == request.env.context.get('lang', ''))
-            if page:
+            if pages:
                 return request.redirect(pages[0].url)
         return res
             
