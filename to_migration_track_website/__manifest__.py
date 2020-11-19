@@ -27,9 +27,9 @@ Provide tracking information for data that have been migrated from other website
     # always loaded
     'data': [
     ],
-    'installable': True,
+    'installable': False,
     'application': False,
-    'auto_install': True,
+    'auto_install': False,# set True after upgrade to 13
     'price': 0.0,
     'currency': 'EUR',
     'license': 'OPL-1',

@@ -23,9 +23,9 @@ Restrict Blog Posts from display on unsupported language website
     'data': [
         'views/blog_post_views.xml',
     ],
-    'installable': True,
+    'installable': False,
     'application': False,
-    'auto_install': True,
+    'auto_install': False, # set True after upgrade to 13
     'price': 45.9,
     'currency': 'EUR',
     'license': 'OPL-1',

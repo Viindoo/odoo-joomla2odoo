@@ -12,5 +12,5 @@ redirect url and thus allows including language code in redirect from url""",
     'version': '0.1',
     'depends': ['website'],
     'data': [],
-    'auto_install': True,
+    'auto_install': False,# set True after upgrade to 13
 }

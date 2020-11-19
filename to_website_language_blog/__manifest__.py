@@ -32,6 +32,7 @@ Restrict Blog Posts from display on unsupported language website
     # always loaded
     'data': [
         'views/blog_post_views.xml',
+        'views/blog_views.xml',
     ],
     'installable': True,
     'application': False,

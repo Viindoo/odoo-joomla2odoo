@@ -15,7 +15,7 @@ Filter website pages by language
     'data': [
         'views/website_page_views.xml'
     ],
-    'installable': True,
+    'installable': False,
     'application': False,
     'auto_install': False,
     'price': 45.9,

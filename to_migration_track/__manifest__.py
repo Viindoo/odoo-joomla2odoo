@@ -26,7 +26,7 @@ Provide tracking information for data that have been migrated from other website
     # always loaded
     'data': [
     ],
-    'installable': True,
+    'installable': False,
     'application': False,
     'auto_install': False,
     'price': 9.9,
