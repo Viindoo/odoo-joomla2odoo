@@ -1,6 +1,8 @@
+import werkzeug
 from odoo import http
 from odoo.addons.website_blog.controllers.main import WebsiteBlog
 from odoo.tools.misc import frozendict
+from odoo.addons.http_routing.models.ir_http import slug
 
 def _enable_blog_filter_by_language():
     context = http.request.env.context.copy()
@@ -11,7 +13,9 @@ class WebsiteBlogEx(WebsiteBlog):
     
     def _prepare_blog_values(self, blogs, blog=False, date_begin=False, date_end=False, tags=False, state=False, page=False):
         if not blogs:
-            return http.request.redirect('/')
+            return werkzeug.utils.redirect('/', code=302)
+        if blog and blog not in blogs:
+            return werkzeug.utils.redirect('/blog/%s' % slug(blogs[0]), code=302)
         return super(WebsiteBlogEx, self)._prepare_blog_values(blogs, blog, date_begin, date_end, tags, state, page)
     
     @http.route()
