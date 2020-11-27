@@ -1,3 +1,4 @@
+import werkzeug
 from odoo import models
 from odoo import http
 from odoo.http import request
@@ -20,7 +21,7 @@ class Http(models.AbstractModel):
             page = request.env['website.page'].sudo().search(page_domain, order='website_id asc', limit=1)
             pages = page.other_language_page_ids.filtered(lambda p: p.language_id.code == request.env.context.get('lang', ''))
             if pages:
-                return request.redirect(pages[0].url)
+                return werkzeug.utils.redirect(pages[0].url, code=302)
         return res
             
             
