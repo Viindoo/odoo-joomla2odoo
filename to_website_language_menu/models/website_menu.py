@@ -8,7 +8,8 @@ class WebsiteMenu(models.Model):
     language_id = fields.Many2one('res.lang', string='Language')
     
     def _update_domain(self, domain):
-        if self.env.context.get('search_from_website', False) and (request.is_frontend or self.env.context.get('js_menu'), False):
+        is_frontend = hasattr(request, 'is_frontend') and request.is_frontend or False
+        if self.env.context.get('search_from_website', False) and (is_frontend or self.env.context.get('js_menu', False)):
             language_code = self.env.context.get('lang', '')
             lang_domain = [
                 '|',
