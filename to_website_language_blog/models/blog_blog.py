@@ -16,9 +16,10 @@ class Blog(models.Model):
         if self.env.context.get('blog_filter_by_language', False):
             language_code = self.env.context.get('lang', '')
             lang_domain = [
-                '|',
+                '|', '|',
                 ('language_id', '=', False),
-                ('language_id.code', '=', language_code)
+                ('language_id.code', '=', language_code),
+                ('language_id.url_code', '=', language_code)
             ]
             domain = expression.AND([domain, lang_domain])
         return domain
