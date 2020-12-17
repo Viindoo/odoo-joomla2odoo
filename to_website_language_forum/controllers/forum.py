@@ -15,14 +15,14 @@ class WebsiteForumEx(WebsiteForum):
         return super(WebsiteForumEx, self).forum(**kwargs)
     
     @http.route()
-    def questions(self, forum, tag=None, page=1, filters='all', sorting=None, search='', post_type=None, **post):
+    def questions(self, forum, tag=None, page=1, filters='all', my=None, sorting=None, search='', **post):
         if forum.language_id:
             if forum.language_id.code != http.request.env.context.get('lang'):
                 forum = http.request.env['forum.forum'].with_context(forum_filter_by_language=False).search([('language_id.code', '=', http.request.env.context.get('lang'))], limit=1)
                 if not forum:
                     raise http.request.not_found()
         _enable_forum_filter_by_language()
-        return super(WebsiteForumEx, self).questions(forum, tag, page, filters, sorting, search, post_type, **post)
+        return super(WebsiteForumEx, self).questions(forum, tag, page, filters, my, sorting, search, **post)
     
     @http.route()
     def question(self, forum, question, **post):
